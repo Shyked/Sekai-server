@@ -1,0 +1,10 @@
+{
+  "name": "nodejs-ex",
+  "version": "0.1.0",
+  "description": "Just some tests to learn nodejs",
+  "main": "server.js",
+  "dependencies": {
+    "socket.io": "~1.3.6"
+  },
+  "author": "Rémy/Shyked <remy.shyked@gmail.com>"
+}
