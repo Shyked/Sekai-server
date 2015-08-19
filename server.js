@@ -1,3 +1,4 @@
+require("requestanimationframe");
 var Clients = require("client").Clients;
 var Worlds = require("world").Worlds;
 var Synchronizer = require("synchronizer").Synchronizer;
@@ -17,72 +18,52 @@ io.on('connection', function(socket){
 });
 
 
-
-
 var startingWorldId = 1;
 
 var startingWorld = Worlds.new(startingWorldId);
 Synchronizer.init(startingWorldId);
 
-startingWorld.addEntity('Rectangle', {
-	x: 0,
-	y: 0,
-	width: 10,
-	height: 10,
-	options: {
-		isStatic: true
-	}
-});
-startingWorld.addEntity('Rectangle', {
-	x: 400,
-	y: 700,
-	width: 800,
-	height: 20,
-	options: {
-		isStatic: true
-	}
-});
-startingWorld.addEntity('Rectangle', {
-	x: -200,
-	y: 500,
-	width: 600,
-	height: 20,
-	options: {
-		angle: Math.PI/4,
-		isStatic: true
-	}
-});
-startingWorld.addEntity('Rectangle', {
+
+
+
+
+/*startingWorld.addEntity('Rectangle', {
 	x: 1000,
 	y: 500,
-	width: 600,
+	width: 4000,
 	height: 20,
 	options: {
-		angle: -Math.PI/4,
-		isStatic: true
+		treatment : 'static'
 	}
-});
+}).physicsBody.state.angular.pos = -Math.PI/4;*/
 
-/*setTimeout(function() {
-	Synchronizer.addEntity(startingWorld, 'Rectangle', {
-		x: 420,
-		y: 200,
-		width: 70,
-		height: 70
-	});
-},5000)*/
-
-setTimeout(function() {
-	Synchronizer.addEntity(startingWorld, 'Circle', {
-		x: 100,
-		y: 300,
-		radius: 40,
+var rectSize = 700;
+for (var i = -10000 ; i < 10000 ; i += rectSize) {
+	yVar = Math.floor(Math.random()*300);
+	startingWorld.addEntity('Rectangle', {
+		x: i,
+		y: 200 + yVar/2,
+		width: rectSize,
+		height: 320 - yVar,
 		options: {
-			frictionStatic: 0.1,
-			restitution: 0.8
+			treatment : 'static'
 		}
 	});
-},4000)
+}
+
+startingWorld.addEntity('Polygon', {
+	x: 0,
+	y: 0,
+	vertices: [
+		{x: 0, y: 0},
+		{x: 20, y: 0},
+		{x: 300, y: 40},
+		{x: 5, y: 35},
+	],
+	options: {
+		treatment : 'static'
+	}
+});
 
 
 

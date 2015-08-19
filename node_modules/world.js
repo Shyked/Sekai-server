@@ -5,13 +5,13 @@
 
 	// CommonJS module
 	if (typeof exports !== 'undefined') {
-	    Matter = require("matter");
-	    Entity = require("Entity");
+	    Physics = require("physicsjs-full");
+	    Entity = require("Entity").Entity;
 	}
 
 	// browser
 	if (typeof window === 'object' && typeof window.document === 'object') {
-	    Matter = window.Matter;
+	    Physics = window.Physics;
 	    Entity = window.Entity;
 	}
 
@@ -49,7 +49,7 @@
 	 */
 	Worlds.prototype.delete = function(id) {
 		if (id instanceof World) id = id.id;
-		Matter.Engine.clear(this.worlds[id].engine);
+		this.worlds[id].physicsWorld.destroy();
 		this.worlds[id] = null;
 		delete this.worlds[id];
 		this.count--;
@@ -81,10 +81,10 @@
 			this.id = world.id;
 			this.entitiesCount = world.entitiesCount;
 			this.entities = {};
-			var matterBodies = [];
+			var physicsBodies = [];
 			for (var idE in world.entities) {
 				this.entities[idE] = Entity.importFromJSON(world.entities[idE]);
-				matterBodies.push(this.entities[idE].matterBody);
+				physicsBodies.push(this.entities[idE].physicsBody);
 			}
 		}
 		// Create empty world
@@ -94,25 +94,27 @@
 			this.entitiesCount = 0;
 		}
 
-		// Init Matter Physics, empty renderer
-		var MyRenderer = {
-		    create: function() {
-		        return { controller: this };
-		    },
 
-		    world: function(engine) {
-		    }
-		};
-		this.engine = Matter.Engine.create({
-		    render: {
-		        controller: MyRenderer
-		    }
+		this.physicsWorld = Physics();
+
+		// ensure objects bounce when edge collision is detected
+		this.physicsWorld.add(Physics.behavior('body-impulse-response'));
+
+		// add some gravity
+		this.physicsWorld.add(Physics.behavior('constant-acceleration', { acc: {x: 0, y: 0.0007} }));
+
+		// collision between the bodies
+		this.physicsWorld.add(Physics.behavior('body-collision-detection'));
+		this.physicsWorld.add(Physics.behavior('sweep-prune'));
+
+		if (physicsBodies) this.physicsWorld.add(physicsBodies);
+
+
+		var physicsWorld = this.physicsWorld;
+		Physics.util.ticker.on(function(time, dt) {
+			physicsWorld.step(time);
 		});
-
-		if (matterBodies) Matter.World.add(this.engine.world, matterBodies);
-
-		Matter.Engine.run(this.engine);
-
+		Physics.util.ticker.start();
 	};
 
 
@@ -132,7 +134,7 @@
 		properties.id = id;
 		entity = new Entity[shape](properties);
 
-		Matter.World.add(this.engine.world, entity.matterBody);
+		this.physicsWorld.add(entity.physicsBody);
 		this.entities[id] = entity;
 		return entity;
 	};
@@ -162,7 +164,7 @@
 	 * @param entitiesData array The simple associative array obtained by exporting an entity, in a array
 	 */
 	World.prototype.importEntitiesFromJSON = function(entitiesData) {
-		var matterBodies = [];
+		var physicsBodies = [];
 		var entity;
 		for (var id in entitiesData) {
 			if (this.entities[entitiesData[id].id]) {
@@ -171,10 +173,10 @@
 			else {
 				entity = Entity.importFromJSON(entitiesData[id]);
 				this.entities[entity.id] = entity;
-				matterBodies.push(entity.matterBody);
+				physicsBodies.push(entity.physicsBody);
 			}
 		}
-		Matter.World.add(this.engine.world, matterBodies);
+		this.physicsWorld.add(physicsBodies);
 	};
 
 
