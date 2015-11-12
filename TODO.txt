@@ -1,0 +1,33 @@
+Serveur :
+
+CHECK N'actualiser que la partie state
+(plus tard) Anticheat (empêcher de traverer les murs (tant que possible))
+CHECK Correction restart
+  (clear) Restructurer un peu mieux : Créer une fonction pour quitter un monde
+CHECK Affichage de pseudos
+CHECK Entités fantômes ?
+Génération du sol à partir de coordonées, et diviser le sol en plusieurs entités
+
+
+
+Client :
+
+CHECK Possibilité de zoom
+CHECK Affichage de pseudos
+Mode plat/monde
+Éditeur de monde
+
+
+
+
+COMMIIIIIIIIIIIT
+
+
+
+
+
+
+
+Idées :
+Mode de jeu RP, un MJ désigné a le droit de faire pop des entités et modifier des règles
+Creepy pasta

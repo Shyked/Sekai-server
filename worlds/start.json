@@ -1,0 +1,137 @@
+{
+	"behaviors": {
+		"gravity": {
+			"acc": {
+				"x": 0,
+				"y": 0.0007
+			}
+		}
+	},
+	"entities": [
+		{
+			"type": "Polygon",
+			"x": 0,
+			"y": 400,
+			"options": {
+				"treatment": "static"
+			},
+			"vertices": [
+				{"x": -300, "y": -100},
+				{"x": 0, "y": 0},
+				{"x": 0, "y": 100},
+				{"x": -300, "y": 100}
+			]
+		},
+		{
+			"type": "Polygon",
+			"x": 0,
+			"y": 400,
+			"options": {
+				"treatment": "static"
+			},
+			"vertices": [
+				{"x": -300, "y": 0},
+				{"x": 0, "y": -100},
+				{"x": 0, "y": 100},
+				{"x": -300, "y": 100}
+			]
+		},
+		{
+			"type": "Polygon",
+			"x": 0,
+			"y": -300,
+			"options": {
+				"treatment": "static",
+				"restitution": 1.6,
+				"angle": 0.8
+			},
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 0, "y": -200},
+				{"x": 200, "y": -200},
+				{"x": 200, "y": 100}
+			],
+			"texture": "polygon_test2"
+		},
+		{
+			"type": "Compound",
+			"x": 0,
+			"y": 0,
+			"options": {
+				"treatment": "static",
+				"angle": 1
+			},
+			"children": [
+				{
+					"type": "Rectangle",
+					"x": 0,
+					"y": 0,
+					"width": 30,
+					"height": 30
+				},
+				{
+					"type": "Rectangle",
+					"x": 40,
+					"y": 0,
+					"width": 30,
+					"height": 40
+				},
+				{
+					"type": "Polygon",
+					"x": 1000,
+					"y": 0,
+					"options": {
+						"treatment": "static",
+						"restitution": 2
+					},
+					"vertices": [
+						{"x": 0, "y": 0},
+						{"x": 0, "y": -200},
+						{"x": 200, "y": -200},
+						{"x": 200, "y": 100}
+					],
+					"texture": "polygon_test2"
+				}
+			]
+		},
+		{
+			"type": "Circle",
+			"x": 0,
+			"y": 0,
+			"radius": 5,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Rectangle",
+			"x": -500,
+			"y": 0,
+			"width": 400,
+			"height": 50,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"LOAD": "car_test",
+			"x": -500,
+			"y": -600
+		},
+		{
+			"LOAD": "car_test",
+			"x": -500,
+			"y": -450
+		},
+		{
+			"LOAD": "car_test",
+			"x": -500,
+			"y": -300
+		},
+		{
+			"LOAD": "car_test",
+			"x": -500,
+			"y": -160
+		}
+	]
+}

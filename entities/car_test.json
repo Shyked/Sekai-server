@@ -1,0 +1,29 @@
+{
+	"type": "Compound",
+	"options": {
+		"treatment": "dynamic",
+		"angle": 0,
+		"restitution": 0.5
+	},
+	"children": [
+		{
+			"type": "Circle",
+			"x": -20,
+			"y": -8,
+			"radius": 10
+		},
+		{
+			"type": "Circle",
+			"x": 20,
+			"y": -8,
+			"radius": 10
+		},
+		{
+			"type": "Rectangle",
+			"x": 0,
+			"y": 0,
+			"width": 70,
+			"height": 20
+		}
+	]
+}

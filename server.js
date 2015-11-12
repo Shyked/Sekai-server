@@ -6,65 +6,13 @@ var Entity = require("entity").Entity;
 
 
 var server = require('http').createServer();
-var io = require('socket.io')(server);
-io.on('connection', function(socket){
 
-	Clients.new(socket.id, socket);
-
-	socket.on('disconnect', function(){
-		Clients.delete(socket.id);
-	});
-
-});
-
-
-var startingWorldId = 1;
-
-var startingWorld = Worlds.new(startingWorldId);
-Synchronizer.init(startingWorldId);
+Clients.attachServer(server);
 
 
 
 
-
-/*startingWorld.addEntity('Rectangle', {
-	x: 1000,
-	y: 500,
-	width: 4000,
-	height: 20,
-	options: {
-		treatment : 'static'
-	}
-}).physicsBody.state.angular.pos = -Math.PI/4;*/
-
-var rectSize = 700;
-for (var i = -10000 ; i < 10000 ; i += rectSize) {
-	yVar = Math.floor(Math.random()*300);
-	startingWorld.addEntity('Rectangle', {
-		x: i,
-		y: 200 + yVar/2,
-		width: rectSize,
-		height: 320 - yVar,
-		options: {
-			treatment : 'static'
-		}
-	});
-}
-
-startingWorld.addEntity('Polygon', {
-	x: 0,
-	y: 0,
-	vertices: [
-		{x: 0, y: 0},
-		{x: 20, y: 0},
-		{x: 300, y: 40},
-		{x: 5, y: 35},
-	],
-	options: {
-		treatment : 'static'
-	}
-});
-
+Synchronizer.setStartingWorldId("newton");
 
 
 
@@ -74,6 +22,10 @@ console.log("Server started");
 
 
 
+
+
+
+/* From Ogar */
 
 var readline = require('readline');	
 var in_ = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -101,6 +53,9 @@ function parseCommands(str) {
 	    if (first == "add") {
 	    	Synchronizer.addEntity(Worlds.get(JSON.parse(split[1])), split[2], JSON.parse(split[3]));
 	    }
+        else if (first == "log") {
+            console.log(Worlds.get("newton").entities);
+        }
 	}
 	catch (e) {
 		console.log(e);
