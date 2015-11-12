@@ -16,7 +16,7 @@ Synchronizer.setStartingWorldId("newton");
 
 
 
-server.listen(4433);
+server.listen((process.env.PORT) ? process.env.PORT : 4433);
 console.log("Server started");
 
 
