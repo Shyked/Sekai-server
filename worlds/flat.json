@@ -49,6 +49,51 @@
 			"options": {
 				"treatment": "static"
 			}
+		},
+		{
+			"type": "Circle",
+			"x": 280,
+			"y": 50,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 300,
+			"y": -150,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 340,
+			"y": 80,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 350,
+			"y": 50,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 200,
+			"y": 80,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
 		}
 	]
 }
