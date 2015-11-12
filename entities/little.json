@@ -2,6 +2,6 @@
 	"type": "Circle",
 	"radius": 10,
 	"options": {
-		"restitution": 0.9
+		"restitution": 0.5
 	}
 }

@@ -12,7 +12,7 @@ Clients.attachServer(server);
 
 
 
-Synchronizer.setStartingWorldId("newton");
+Synchronizer.setStartingWorldId("flat");
 
 
 

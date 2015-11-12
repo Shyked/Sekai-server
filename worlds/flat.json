@@ -1,0 +1,54 @@
+{
+	"type": "flat",
+	"behaviors": {
+		"gravity": {
+			"acc": {
+				"x": 0,
+				"y": 0.0009
+			}
+		}
+	},
+	"spawn": {
+		"x": 0,
+		"y": 0
+	},
+	"entities": [
+		{
+			"type" : "Rectangle",
+			"x": 0,
+			"y": 200,
+			"width": 2000,
+			"height": 30,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 200,
+			"y": 0,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 230,
+			"y": 50,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 250,
+			"y": -100,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		}
+	]
+}

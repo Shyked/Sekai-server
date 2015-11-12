@@ -7,6 +7,9 @@ CHECK Correction restart
 CHECK Affichage de pseudos
 CHECK Entités fantômes ?
 Génération du sol à partir de coordonées, et diviser le sol en plusieurs entités
+CHECK Entité considérée comme trop éloignée ? Déplacement sacadé (sleep)
+CHECK Chatbox
+EN COURS Changer de monde avec une commande
 
 
 
@@ -14,8 +17,9 @@ Client :
 
 CHECK Possibilité de zoom
 CHECK Affichage de pseudos
-Mode plat/monde
+CHECK Mode plat/monde
 Éditeur de monde
+CHECK Chatbox
 
 
 
