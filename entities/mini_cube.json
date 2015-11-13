@@ -1,9 +1,8 @@
 {
 	"type": "Rectangle",
-	"width": 70,
-	"height": 70,
-	"texture": "bloc",
+	"width": 10,
+	"height": 10,
 	"options": {
-		"restitution": 1
+		"restitution": 0.5
 	}
 }

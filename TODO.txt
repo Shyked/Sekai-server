@@ -9,7 +9,8 @@ CHECK Entités fantômes ?
 Génération du sol à partir de coordonées, et diviser le sol en plusieurs entités
 CHECK Entité considérée comme trop éloignée ? Déplacement sacadé (sleep)
 CHECK Chatbox
-EN COURS Changer de monde avec une commande
+CHECK Changer de monde avec une commande
+Joueur à rotation fixe
 
 
 
