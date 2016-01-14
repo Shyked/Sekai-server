@@ -35,7 +35,8 @@
 	Entity.Generic.prototype.init = function(p) {
 		var id = p.id,
 			texture = p.texture,
-			textureScale = p.textureScale;
+			textureScale = p.textureScale,
+			style = p.style;
 
 		this.id = id;
 
@@ -48,6 +49,8 @@
 
 		this.texture = texture || null;
 		this.textureScale = textureScale || {x: 1, y: 1};
+
+		this.style = style;
 
 		this.rotation = (p.rotation != undefined) ? p.rotation : true;
 		p.rotation = undefined;
@@ -180,7 +183,7 @@
 			this.childrenCount++;
 		}
 		this.hiddenChildren = hiddenChildren;
-		
+
 		this.physicsBody = Physics.body('compound', options);
 
 		var aabb = this.physicsBody.aabb();
