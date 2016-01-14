@@ -1,0 +1,9 @@
+{
+	"type": "Rectangle",
+	"width": 150,
+	"height": 150,
+	"texture": "black",
+	"options": {
+		"restitution": 0.5
+	}
+}

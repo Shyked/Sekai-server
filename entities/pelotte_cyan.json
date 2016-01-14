@@ -1,0 +1,8 @@
+{
+	"type": "Circle",
+	"radius": 35,
+	"options": {
+		"restitution": 0.8
+	},
+	"texture": "pelotte_epur_cyan"
+}

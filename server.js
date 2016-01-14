@@ -1,4 +1,5 @@
 require("requestanimationframe");
+require("modulo");
 var Clients = require("client").Clients;
 var Worlds = require("world").Worlds;
 var Synchronizer = require("synchronizer").Synchronizer;

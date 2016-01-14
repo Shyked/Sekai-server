@@ -1,5 +1,6 @@
 {
 	"type": "Compound",
+	"rotation": false,
 	"options": {
 		"treatment": "dynamic",
 		"angle": 0,
@@ -24,6 +25,17 @@
 			"y": 0,
 			"width": 70,
 			"height": 20
+		},
+		{
+			"type": "Polygon",
+			"x": 0,
+			"y": -16,
+			"vertices": [
+				{"x": -17, "y": -11},
+				{"x": 17, "y": -11},
+				{"x": 22, "y": 0},
+				{"x": -22, "y": 0}
+			]
 		}
 	]
 }

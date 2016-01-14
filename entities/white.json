@@ -1,0 +1,10 @@
+{
+	"type": "Rectangle",
+	"width": 150,
+	"height": 150,
+	"texture": "white",
+	"rotation": false,
+	"options": {
+		"restitution": 0.5
+	}
+}

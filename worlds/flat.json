@@ -17,8 +17,24 @@
 			"type" : "Rectangle",
 			"x": 0,
 			"y": 200,
-			"width": 2000,
+			"width": 4000,
 			"height": 30,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"LOAD": "white",
+			"x": -500,
+			"y": 60,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"LOAD": "black",
+			"x": -650,
+			"y": 60,
 			"options": {
 				"treatment": "static"
 			}

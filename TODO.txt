@@ -6,11 +6,13 @@ CHECK Correction restart
   (clear) Restructurer un peu mieux : Créer une fonction pour quitter un monde
 CHECK Affichage de pseudos
 CHECK Entités fantômes ?
-Génération du sol à partir de coordonées, et diviser le sol en plusieurs entités
 CHECK Entité considérée comme trop éloignée ? Déplacement sacadé (sleep)
 CHECK Chatbox
 CHECK Changer de monde avec une commande
+CHECK Balle chat
+Génération du sol à partir de coordonées, et diviser le sol en plusieurs entités
 Joueur à rotation fixe
+Gamemode (possibilité de choisir son skin)
 
 
 
@@ -19,8 +21,10 @@ Client :
 CHECK Possibilité de zoom
 CHECK Affichage de pseudos
 CHECK Mode plat/monde
-Éditeur de monde
 CHECK Chatbox
+CHECK Zoom sur le flat
+Éditeur de monde
+Dernier message de la chatbox en appuyant sur haut (si focus sur la chatbox rediriger l'event)
 
 
 

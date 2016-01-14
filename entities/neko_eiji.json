@@ -1,0 +1,8 @@
+{
+	"type": "Circle",
+	"radius": 32,
+	"options": {
+		"restitution": 0.5
+	},
+	"texture": "neko_eiji"
+}
