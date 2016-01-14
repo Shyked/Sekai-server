@@ -4,8 +4,10 @@
 	"options": {
 		"treatment": "dynamic",
 		"angle": 0,
-		"restitution": 0.5
+		"restitution": 0.1
 	},
+	"texture": "car_test",
+	"hiddenChildren": true,
 	"children": [
 		{
 			"type": "Circle",

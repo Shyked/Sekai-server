@@ -157,6 +157,7 @@
 			x = p.x,
 			y = p.y,
 			children = p.children || {},
+			hiddenChildren = p.hiddenChildren,
 			state = p.state,
 			options = p.options || {};
 
@@ -178,6 +179,8 @@
 			options.children.push(child.physicsBody);
 			this.childrenCount++;
 		}
+		this.hiddenChildren = hiddenChildren;
+		
 		this.physicsBody = Physics.body('compound', options);
 
 		var aabb = this.physicsBody.aabb();

@@ -1,0 +1,141 @@
+{
+	"type": "circular",
+	"behaviors": {
+		"newtonian": {
+			"strength": 0.04
+		},
+		"attractors": [
+			{
+				"pos": {
+					"x": 0,
+					"y": 0
+				},
+				"strength": 0.005,
+				"order": 0.2
+			}
+		]
+	},
+	"spawn": {
+		"x": 0,
+		"y": 2100,
+		"angle": 3.1415926535
+	},
+	"ground": {
+		"0": 2000
+	},
+	"entities": [
+		{
+			"type": "Circle",
+			"x": 0,
+			"y": 0,
+			"radius": 2000,
+			"options": {
+				"treatment": "static",
+				"cof": 0.8,
+				"restitution": 0.5
+			}
+		},
+		{
+			"LOAD": "Bloc",
+			"x": 0,
+			"y": -2200,
+			"options": {
+				"treatment": "static",
+				"angle": 0,
+				"restitution": 0.5
+			}
+		},
+		{
+			"type": "Rectangle",
+			"x": 1030,
+			"y": 2200,
+			"width": 2000,
+			"height": 10,
+			"options": {
+				"treatment": "static",
+				"restitution": 0.5
+			}
+		},
+		{
+			"type": "Rectangle",
+			"x": -1030,
+			"y": 2200,
+			"width": 2000,
+			"height": 10,
+			"options": {
+				"treatment": "static",
+				"restitution": 0.5
+			}
+		},
+		{
+			"type": "Rectangle",
+			"x": 2200,
+			"y": -1030,
+			"width": 2000,
+			"height": 10,
+			"options": {
+				"treatment": "static",
+				"angle": 1.57,
+				"restitution": 0.5
+			}
+		},
+		{
+			"type": "Rectangle",
+			"x": 2200,
+			"y": 1030,
+			"width": 2000,
+			"height": 10,
+			"options": {
+				"treatment": "static",
+				"angle": 1.57,
+				"restitution": 0.5
+			}
+		},
+		{
+			"type": "Rectangle",
+			"x": -2200,
+			"y": -1030,
+			"width": 2000,
+			"height": 10,
+			"options": {
+				"treatment": "static",
+				"angle": 1.57,
+				"restitution": 0.5
+			}
+		},
+		{
+			"type": "Rectangle",
+			"x": -2200,
+			"y": 1030,
+			"width": 2000,
+			"height": 10,
+			"options": {
+				"treatment": "static",
+				"angle": 1.57,
+				"restitution": 0.5
+			}
+		},
+		{
+			"type": "Rectangle",
+			"x": 1030,
+			"y": -2200,
+			"width": 2000,
+			"height": 10,
+			"options": {
+				"treatment": "static",
+				"restitution": 0.5
+			}
+		},
+		{
+			"type": "Rectangle",
+			"x": -1030,
+			"y": -2200,
+			"width": 2000,
+			"height": 10,
+			"options": {
+				"treatment": "static",
+				"restitution": 0.5
+			}
+		}
+	]
+}
