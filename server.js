@@ -13,7 +13,7 @@ Clients.attachServer(server);
 
 
 
-Synchronizer.setStartingWorldId("flat");
+Synchronizer.setStartingWorldId("planet");
 
 
 

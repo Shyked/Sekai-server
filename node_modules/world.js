@@ -201,7 +201,8 @@
 	 *
 	 * @param properties array Other properties that helps to construct the entity.
 	 */
-	World.prototype.addEntity = function(properties) {
+	World.prototype.addEntity = function(properties, addToWorld) {
+		if (addToWorld === undefined) addToWorld = true;
 		var entity;
 		var id = this.entitiesCount++;
 		if (!properties.options) properties.options = {};
@@ -209,7 +210,14 @@
 		properties.id = id;
 		entity = new Entity[properties.type](properties);
 
-		this.physicsWorld.add(entity.physicsBody);
+		if (addToWorld) {
+			try {
+				this.physicsWorld.add(entity.physicsBody);
+			}
+			catch(e) {
+				console.log(e);
+			}
+		}
 		this.entities[id] = entity;
 		return entity;
 	};
@@ -270,7 +278,98 @@
 			this.type = worldJSON.type;
 		}
 
+
 		this.entitiesCount = worldJSON.entitiesCount || this.entitiesCount;
+
+		if (worldJSON.ground) {
+
+			var world = this;
+
+			var createPart = function(pos, prevPos) {
+				if (prevPos !== null) {
+					return {
+						"type": "Polygon",
+						"vertices": [
+							{x: 0, y: 0},
+							{x: prevPos.x, y: prevPos.y},
+							{x: pos.x, y: pos.y}
+						],
+						"options": {
+							"treatment": "static",
+							"cof": 0.8,
+							"restitution": 0.5
+						}
+					};
+				}
+				else return null;
+			};
+
+			var createCompound = function(children, texture) {
+
+				var entity = world.addEntity({
+					"type": "Compound",
+					"hiddenChildren": (texture),
+					"options": {
+						"treatment": "static",
+						"cof": 0.8,
+						"restitution": 0.5
+					}
+				}, false);
+				if (texture) entity.texture = texture;
+
+				for (var idC in children) {
+					var child = Entity.new(children[idC]);
+					entity.addChild(child);
+					entity.children[idC].physicsBody.state.pos.x = entity.children[idC].physicsBody.state.pos.x - entity.children[idC].physicsBody.geometry.vertices[0].x;
+					entity.children[idC].physicsBody.state.pos.y = entity.children[idC].physicsBody.state.pos.y - entity.children[idC].physicsBody.geometry.vertices[0].y;
+				}
+				world.physicsWorld.add(entity.physicsBody);
+
+				entity.refreshCom();
+				
+				entity.physicsBody.state.pos.x = entity.physicsBody.state.pos.x + entity.com.x; entity.refreshCom();
+				entity.physicsBody.state.pos.y = entity.physicsBody.state.pos.y + entity.com.y;
+
+				for (var idC in entity.physicsBody.children) {
+					var child = entity.physicsBody.children[idC];
+					if (child.geometry.vertices) {
+						child.state.pos.x = child.state.pos.x - entity.com.x;
+						child.state.pos.y = child.state.pos.y - entity.com.y;
+					}
+				}
+
+				entity.refreshCom();
+			};
+
+
+			var prevPos = null;
+			var firstPos = null;
+			var children = [];
+			var texture = "";
+			for (var idG in worldJSON.ground) {
+				if (children.length > 0) createCompound(children, texture);
+				var part = worldJSON.ground[idG];
+				children = [];
+				for (var idP in part) {
+					var pos = rotatePoint(
+						part[idP][1],
+						0,
+						(part[idP][0] / 100) * Math.PI * 2,
+						0,
+						0
+					);
+					var child = createPart(pos, prevPos);
+					if (child !== null) children.push(child);
+
+					prevPos = pos;
+					if (!firstPos) firstPos = pos;
+				}
+				texture = worldJSON.groundTextures[idG];
+			}
+			children.push(createPart(firstPos, prevPos));
+			createCompound(children);
+		}
+
 		this.updateEntities(worldJSON.entities);
 	};
 

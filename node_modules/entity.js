@@ -202,6 +202,29 @@
 	};
 	Entity.Compound.prototype = new Entity.Generic();
 
+	Entity.Compound.prototype.addChild = function(child) {
+		child = Entity.new(child);
+
+		child.id = this.childrenCount;
+		this.children[this.childrenCount] = child;
+		this.physicsBody.addChild(child.physicsBody);
+		this.childrenCount++;
+	};
+
+	Entity.Compound.prototype.refreshCom = function() {
+		this.physicsBody.refreshGeometry();
+		this.com = Physics.body.getCOM(this.physicsBody.children);
+		this.com = {
+			x: this.com.x,
+			y: this.com.y
+		};
+		var aabb = this.physicsBody.aabb();
+		this.textureCenter = {
+			x: aabb.x - this.physicsBody.state.pos.x,
+			y: aabb.y - this.physicsBody.state.pos.y
+		};
+	};
+
 
 
 

@@ -1,0 +1,813 @@
+{
+	"type": "flat",
+	"behaviors": {
+		"gravity": {
+			"acc": {
+				"x": 0,
+				"y": 0.0009
+			}
+		}
+	},
+	"spawn": {
+		"x": 0,
+		"y": 0
+	},
+	"entities": [
+		{
+			"type" : "Rectangle",
+			"x": 0,
+			"y": 200,
+			"width": 4000,
+			"height": 30,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"LOAD": "white",
+			"x": -500,
+			"y": 60,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"LOAD": "black",
+			"x": -650,
+			"y": 60,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 200,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 400,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 500,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 600,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 700,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 800,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 900,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1100,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1200,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1300,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1400,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1500,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1600,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1700,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1800,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1900,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 2000,
+			"y": 0,
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 100, "y": 0},
+				{"x": 120, "y": 200},
+				{"x": 50, "y": 200}
+			],
+			"options": {
+				"treatment": "static"
+			}
+		}
+	]
+}
