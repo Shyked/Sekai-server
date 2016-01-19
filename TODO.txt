@@ -4,9 +4,9 @@ Serveur :
 CHECK Correction restart
   (clear) Restructurer un peu mieux : Créer une fonction pour quitter un monde
 
-Génération du sol à partir de coordonées, et diviser le sol en plusieurs entités
 Joueur à rotation fixe
 Gamemode (possibilité de choisir son skin)
+Entités non physiques, décoration
 
 
 
@@ -14,6 +14,8 @@ Client :
 
 Éditeur de monde
 Dernier message de la chatbox en appuyant sur haut (si focus sur la chatbox rediriger l'event)
+Texture offset
+Background
 
 
 

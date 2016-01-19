@@ -1,0 +1,178 @@
+{
+	"type": "flat",
+	"behaviors": {
+		"gravity": {
+			"acc": {
+				"x": 0,
+				"y": 0.0009
+			}
+		}
+	},
+	"spawn": {
+		"x": 0,
+		"y": 0
+	},
+	"limits": [-3000, 3000],
+	"ground": [
+		[
+			[-3000, 500],
+			[-2000, 300],
+			[-1000, 500],
+			[0, 600]
+		],
+		[
+			[0, 600],
+			[1000, 500],
+			[2000, 500],
+			[3000, 500]
+		]
+	],
+	"entities": [
+		{
+			"type" : "Rectangle",
+			"x": 0,
+			"y": 200,
+			"width": 4000,
+			"height": 30,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"LOAD": "white",
+			"x": -500,
+			"y": 60,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"LOAD": "black",
+			"x": -650,
+			"y": 60,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 200,
+			"y": 0,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 230,
+			"y": 50,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 250,
+			"y": -100,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 280,
+			"y": 50,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 300,
+			"y": -150,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 340,
+			"y": 80,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 350,
+			"y": 50,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Circle",
+			"x": 200,
+			"y": 80,
+			"radius": 20,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type": "Polygon",
+			"x": 1000,
+			"y": -100,
+			"options": {
+				"treatment": "static"
+			},
+			"texture": "polygon_test2",
+			"vertices": [
+				{"x": 0, "y": 0},
+				{"x": 200, "y": 0},
+				{"x": 200, "y": 300},
+				{"x": 0, "y": 200}
+			]
+		},
+		{
+			"type": "Compound",
+			"x": 1500,
+			"y": -100,
+			"options": {
+				"treatment": "static"
+			},
+			"texture": "polygon_test2",
+			"children": [
+				{
+					"type": "Polygon",
+					"x": 50,
+					"y": -25,
+					"vertices": [
+						{"x": 0, "y": 0},
+						{"x": 100, "y": 0},
+						{"x": 100, "y": 250},
+						{"x": 0, "y": 200}
+					]
+				},
+				{
+					"type": "Polygon",
+					"x": 150,
+					"y": 0,
+					"vertices": [
+						{"x": 100, "y": 0},
+						{"x": 200, "y": 0},
+						{"x": 200, "y": 300},
+						{"x": 100, "y": 250}
+					]
+				}
+			]
+		}
+	]
+}
