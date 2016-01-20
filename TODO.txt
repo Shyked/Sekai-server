@@ -4,7 +4,6 @@ Serveur :
 CHECK Correction restart
   (clear) Restructurer un peu mieux : Créer une fonction pour quitter un monde
 
-Joueur à rotation fixe
 Gamemode (possibilité de choisir son skin)
 Entités non physiques, décoration
 
@@ -16,6 +15,8 @@ Client :
 Dernier message de la chatbox en appuyant sur haut (si focus sur la chatbox rediriger l'event)
 Texture offset
 Background
+Menu pause avec options de performance
+Afficher les pseudos par dessus tout
 
 
 
