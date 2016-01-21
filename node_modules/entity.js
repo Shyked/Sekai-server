@@ -36,6 +36,7 @@
 		var id = p.id,
 			texture = p.texture,
 			textureScale = p.textureScale,
+			textureOffset = p.textureOffset,
 			style = p.style;
 
 		this.id = id;
@@ -49,6 +50,8 @@
 
 		this.texture = texture || null;
 		this.textureScale = textureScale || {x: 1, y: 1};
+		this.textureOffset = textureOffset || {x: 0, y: 0};
+		this.textureCenter = {x: 0, y: 0};
 
 		this.style = style;
 
