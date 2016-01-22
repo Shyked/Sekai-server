@@ -12,7 +12,6 @@ Entités non physiques, décoration
 Client :
 
 Éditeur de monde
-zIndex sur les textures
 Background
 Menu pause avec options de performance
 

@@ -37,6 +37,7 @@
 			texture = p.texture,
 			textureScale = p.textureScale,
 			textureOffset = p.textureOffset,
+			zIndex = p.zIndex,
 			style = p.style;
 
 		this.id = id;
@@ -52,6 +53,8 @@
 		this.textureScale = textureScale || {x: 1, y: 1};
 		this.textureOffset = textureOffset || {x: 0, y: 0};
 		this.textureCenter = {x: 0, y: 0};
+
+		this.zIndex = zIndex || 0;
 
 		this.style = style;
 
