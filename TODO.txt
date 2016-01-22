@@ -6,7 +6,6 @@ CHECK Correction restart
 
 Gamemode (possibilité de choisir son skin)
 Entités non physiques, décoration
-Réduire la taille du sol sur les mondes circulaires
 
 
 

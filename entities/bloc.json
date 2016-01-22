@@ -4,7 +4,7 @@
 	"height": 70,
 	"texture": "bloc",
 	"textureOffset": {
-		"x": 70,
+		"x": 0,
 		"y": 0
 	},
 	"options": {
