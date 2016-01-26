@@ -33,6 +33,10 @@
 	};
 
 	Entity.Generic.prototype.init = function(p) {
+
+		// Bugy argument protetion
+		if (p.options) delete p.options.angle;
+
 		var id = p.id,
 			texture = p.texture,
 			textureScale = p.textureScale,
@@ -64,6 +68,33 @@
 		this.player = false;
 		this.move = null;
 	};
+
+
+	Entity.Generic.prototype.getPos = function() {
+		if (this.type == "Decoration") {
+			return {
+				"x": this.x,
+				"y": this.y
+			};
+		}
+		else if (!this.type) {
+			return {x: 0, y: 0};
+		}
+		else {
+			return {
+				"x": this.physicsBody.state.pos.x,
+				"y": this.physicsBody.state.pos.y
+			};
+		}
+	};
+
+	Entity.Generic.prototype.getAngle = function() {
+		if (this.type == "Decoration") return 0;
+		else if (!this.type) return 0;
+		else return this.physicsBody.state.angular.pos;
+	};
+
+
 
 	// Option example : { treatment : 'static' }
 	// restitution, mass, cof (friction), hidden (rendered or not)
@@ -232,6 +263,22 @@
 	};
 
 
+	Entity.Decoration = function(p) {
+		this.init(p);
+
+		var id = p.id,
+			x = p.x,
+			y = p.y;
+
+
+		this.type = 'Decoration';
+
+		this.x = x;
+		this.y = y;
+	};
+	Entity.Decoration.prototype = new Entity.Generic();
+
+
 
 
 
@@ -240,13 +287,6 @@
 	/* IMPORT */
 
 	Entity.import = function(entityJSON) {
-		/*if (entityJSON.type == "Compound") { // If the entity id Compound, convert the childs Arrays to Entities
-			var children = [];
-			for (var id in entityJSON.children) {
-				children.push(Entity.import(entityJSON.children[id]));
-			}
-			entityJSON.children = children;
-		}*/
 		return new Entity[entityJSON.type](entityJSON);
 	};
 
@@ -259,16 +299,21 @@
 
 	Entity.Generic.prototype.export = function() {
 		var entityJSON = {};
-		entityJSON.state = {};
-		Entity.copyState(this.physicsBody.state, entityJSON.state, true);
-		entityJSON.options = {};
-		Entity.copyOptions(this.physicsBody, entityJSON.options, true);
+		if (this.physicsBody) {
+			entityJSON.state = {};
+			Entity.copyState(this.physicsBody.state, entityJSON.state, true);
+			entityJSON.options = {};
+			Entity.copyOptions(this.physicsBody, entityJSON.options, true);
+		}
 
 		for (var id in this) {
 			if (typeof id != 'function' && id != 'physicsBody' && id != 'smoothTeleport') entityJSON[id] = this[id];
 		}
-		entityJSON.x = this.physicsBody.state.pos.x;
-		entityJSON.y = this.physicsBody.state.pos.y;
+		var pos = this.getPos();
+		var angle = this.getAngle();
+		entityJSON.x = pos.x;
+		entityJSON.y = pos.y;
+		entityJSON.angle = angle;
 		return entityJSON;
 	};
 
@@ -309,15 +354,20 @@
 			deltaAdd.x = entity.smoothTeleport.positionDelta.x * entity.smoothTeleport.progressSinus;
 			deltaAdd.y = entity.smoothTeleport.positionDelta.y * entity.smoothTeleport.progressSinus;
 		}
+		var pos = this.getPos();
+		var angle = this.getAngle();
 		entity.smoothTeleport = {
-			angleDelta: entity.physicsBody.state.angular.pos - entityJSON.state.angular.pos,
-			positionDelta: {
-				x: entity.physicsBody.state.pos.x - entityJSON.state.pos.x + deltaAdd.x,
-				y: entity.physicsBody.state.pos.y - entityJSON.state.pos.y + deltaAdd.y
+			angleDelta: angle - entityJSON.angle, // Revoir l'export qui envoit l'angle via le state, il devrait l'envoyer autrement
+			positionDelta: { // Ou alors, faire une condition pour vérifier si y'a un state ou non, et donc si on doit le prendre en compte
+				x: pos.x - entityJSON.x + deltaAdd.x, // Ajouter un angle pour les déco
+				y: pos.y - entityJSON.y + deltaAdd.y
 			},
 			progress: 0,
 			progressSinus: 1
 		};
+		this.x = entityJSON.x;
+		this.y = entityJSON.y;
+		this.angle = entityJSON.angle;
 
 		for (var id in entityJSON) {
 			if (id != 'type' && id != 'smoothTeleport' && id != 'state') entity[id] = entityJSON[id];

@@ -1,6 +1,6 @@
 {
 	"type": "Compound",
-	"rotation": false,
+	"rotation": true,
 	"options": {
 		"treatment": "dynamic",
 		"angle": 0,

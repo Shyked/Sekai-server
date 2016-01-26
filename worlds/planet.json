@@ -118,7 +118,6 @@
 			"y": -2200,
 			"options": {
 				"treatment": "static",
-				"angle": 0,
 				"restitution": 0.5
 			}
 		},
@@ -152,8 +151,12 @@
 			"height": 10,
 			"options": {
 				"treatment": "static",
-				"angle": 1.57,
 				"restitution": 0.5
+			},
+			"state": {
+				"angular": {
+					"pos": 1.57
+				}
 			}
 		},
 		{
@@ -164,8 +167,12 @@
 			"height": 10,
 			"options": {
 				"treatment": "static",
-				"angle": 1.57,
 				"restitution": 0.5
+			},
+			"state": {
+				"angular": {
+					"pos": 1.57
+				}
 			}
 		},
 		{
@@ -176,8 +183,12 @@
 			"height": 10,
 			"options": {
 				"treatment": "static",
-				"angle": 1.57,
 				"restitution": 0.5
+			},
+			"state": {
+				"angular": {
+					"pos": 1.57
+				}
 			}
 		},
 		{

@@ -6,14 +6,15 @@ CHECK Correction restart
 
 Gamemode (possibilité de choisir son skin)
 Entités non physiques, décoration
+Contraintes de distance (et d'autres trucs en rapport avec les physiques)
 
 
 
 Client :
 
 Éditeur de monde
-Background
 Menu pause avec options de performance
+Chargement ?
 
 
 

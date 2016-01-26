@@ -13,8 +13,12 @@
 		"y": 0
 	},
 	"limits": [-3000, 3000],
-	"groundDepth": 100,
-	"groundTextures": [
+	"background_image": "auto-flat",
+	"background_color": "0x05081b",
+	"background_depth": 0.3,
+	"background_divisionSize": 512,
+	"ground_depth": 100,
+	"ground_textures": [
 		"",
 		"herbe",
 		"",
@@ -55,6 +59,37 @@
 		]
 	],
 	"entities": [
+		{
+			"type" : "Rectangle",
+			"x": 2600,
+			"y": -2800,
+			"width": 200,
+			"height": 30,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type" : "Rectangle",
+			"x": 2515,
+			"y": -2815,
+			"width": 30,
+			"height": 60,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
+			"type" : "Rectangle",
+			"x": 2685,
+			"y": -2815,
+			"width": 30,
+			"height": 60,
+			"options": {
+				"treatment": "static"
+			}
+		},
+
 		{
 			"type" : "Rectangle",
 			"x": 0,
@@ -200,6 +235,12 @@
 					]
 				}
 			]
+		},
+		{
+			"LOAD": "deco",
+			"x": -900,
+			"y": 185,
+			"zIndex": -1
 		}
 	]
 }
