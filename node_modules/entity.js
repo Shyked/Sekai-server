@@ -66,7 +66,17 @@
 		p.rotation = undefined;
 
 		this.player = false;
-		this.move = null;
+		this.move = {
+			direction: {
+				up: false,
+				left: false,
+				down: false,
+				right: false
+			},
+			speed: 0,
+			acc: 0
+		};
+		this.jump = false;
 	};
 
 

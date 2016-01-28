@@ -4,9 +4,15 @@ Serveur :
 CHECK Correction restart
   (clear) Restructurer un peu mieux : Créer une fonction pour quitter un monde
 
-Gamemode (possibilité de choisir son skin)
-Entités non physiques, décoration
+Possibilité de choisir son skin
 Contraintes de distance (et d'autres trucs en rapport avec les physiques)
+
+
+CHECK Entités non physiques, décoration
+CHECK Gamemode
+
+
+
 
 
 

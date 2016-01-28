@@ -1,6 +1,6 @@
 (function() {
 
-	var Matter;
+	var Physics;
 	var Entity;
 	var Loader;
 
@@ -9,12 +9,14 @@
 	    Physics = require("physicsjs-full");
 	    Entity = require("entity").Entity;
 	    Loader = require("loader").Loader;
+	    Gamemodes = require("./gamemodes");
 	}
 
 	// browser
 	if (typeof window === 'object' && typeof window.document === 'object') {
 	    Physics = window.Physics;
 	    Entity = window.Entity;
+	    Gamemodes = window.Gamemodes;
 	}
 
 
@@ -108,6 +110,7 @@
 		this.spawn = null;
 		this.type = null;
 		this.limits = null;
+		this.gamemode = null;
 		this.background = {
 			"image": null,
 			"color": null,
@@ -145,28 +148,90 @@
 
 
 	World.prototype.afterStep = function(time) {
-		var vx;
-		var vy;
+		var e;
+		var displPos;
+		var displAngleDist;
 		var angleDistVel;
 		var angleDistPos;
 		var vel;
-		var modAngle;
-		var deltaAngle;
+		var previousSpeed;
+		var coeff;
+		var newSpeed;
 		for (var idE in this.entities) {
-			if (this.entities[idE].player) {
-				if (this.entities[idE].move) {
-					this.entities[idE].physicsBody.sleep(false);
+			e = this.entities[idE];
+			if (e.physicsBody) {
+				// If the entity is moving
+				if (e.move.speed) {
+					e.physicsBody.sleep(false);
+
+					displPos = {
+						x: 0,
+						y: 0
+					};
+					if (e.move.direction["up"]) displPos.y--;
+					if (e.move.direction["left"]) displPos.x--;
+					if (e.move.direction["down"]) displPos.y++;
+					if (e.move.direction["right"]) displPos.x++;
+					displAngleDist = toAngleDist(displPos);
+
+					if (displAngleDist.dist > 0) {
+						displAngleDist.dist = e.move.speed * e.move.acc;
+						vel = {
+							x: e.physicsBody.state.vel.x,
+							y: e.physicsBody.state.vel.y
+						};
+						previousSpeed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+						displPos = toXY(displAngleDist);
+						if (this.type == "circular") {
+							angleDistPos = toAngleDist({ // Get pos relative to the world
+								x: e.physicsBody.state.pos.x,
+								y: e.physicsBody.state.pos.y
+							});
+							vel = rotatePoint( // Velocity relative to the player
+								vel.x, vel.y,
+								- (angleDistPos.angle + Math.PI/2),
+								0, 0
+							);
+						}
+
+						if (vel.x * Math.sign(displPos.x) < e.move.speed) {
+							vel.x += displPos.x;
+						}
+						if ((vel.y < e.move.speed || displPos.y < 0) && (vel.y > -e.move.speed || displPos.y > 0)) {
+							vel.y += displPos.y;
+						}
+
+						if (this.type == "circular") {
+							vel = rotatePoint( // Velocity relative to the world
+								vel.x, vel.y,
+								(angleDistPos.angle + Math.PI/2),
+								0, 0
+							);
+						}
+						newSpeed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+						/*if (newSpeed > e.move.speed && newSpeed > previousSpeed) {
+							vel.x *= previousSpeed / newSpeed;
+							vel.y *= previousSpeed / newSpeed;
+						}*/
+						e.physicsBody.state.vel.x = vel.x;
+						e.physicsBody.state.vel.y = vel.y;
+					}
+				}
+
+				// If the entity must jump
+				if (e.jump) {
+
 					if (this.type == "circular") {
-						angleDistPos = toAngleDist({
-							x: this.entities[idE].physicsBody.state.pos.x,
-							y: this.entities[idE].physicsBody.state.pos.y
+						var angleDistPos = toAngleDist({
+							x: e.physicsBody.state.pos.x,
+							y: e.physicsBody.state.pos.y
 						});
 						vel = rotatePoint(
-							this.entities[idE].physicsBody.state.vel.x, this.entities[idE].physicsBody.state.vel.y,
+							e.physicsBody.state.vel.x, e.physicsBody.state.vel.y,
 							- (angleDistPos.angle + Math.PI/2),
 							0, 0
 						);
-						if (vel.x * this.entities[idE].move.side < this.entities[idE].move.speed) vel.x += this.entities[idE].move.speed * this.entities[idE].move.side / 15;
+						if (vel.y > -e.jump) vel.y = -e.jump;
 						vel = rotatePoint(
 							vel.x, vel.y,
 							(angleDistPos.angle + Math.PI/2),
@@ -175,36 +240,44 @@
 					}
 					else if (this.type == "flat") {
 						vel = {
-							x: this.entities[idE].physicsBody.state.vel.x,
-							y: this.entities[idE].physicsBody.state.vel.y
+							x: e.physicsBody.state.vel.x,
+							y: e.physicsBody.state.vel.y
 						};
-						if (vel.x * this.entities[idE].move.side < this.entities[idE].move.speed) vel.x += this.entities[idE].move.speed * this.entities[idE].move.side / 15;
+						if (vel.y > -e.jump) vel.y = -e.jump;
 					}
-					this.entities[idE].physicsBody.state.vel.x = vel.x;
-					this.entities[idE].physicsBody.state.vel.y = vel.y;
+					e.physicsBody.state.vel.x = vel.x;
+					e.physicsBody.state.vel.y = vel.y;
+
+					e.physicsBody.sleep(false);
+
+					e.jump = false;
 				}
-				if (this.limits) {
-					if (this.entities[idE].physicsBody.state.pos.x < this.limits[0]
-						|| this.entities[idE].physicsBody.state.pos.x > this.limits[1]) {
-						this.entities[idE].physicsBody.state.pos.x = Math.min(Math.max(this.entities[idE].physicsBody.state.pos.x, this.limits[0]), this.limits[1]);
-						this.entities[idE].physicsBody.state.vel.x = 0;
+
+				// If the entity is a player and the world has limits
+				if (e.player && this.limits) {
+					if (e.physicsBody.state.pos.x < this.limits[0]
+						|| e.physicsBody.state.pos.x > this.limits[1]) {
+						e.physicsBody.state.pos.x = Math.min(Math.max(e.physicsBody.state.pos.x, this.limits[0]), this.limits[1]);
+						e.physicsBody.state.vel.x = 0;
 					}
 				}
-			}
-			if (!this.entities[idE].rotation) {
-				if (this.type == "circular") {
-					var targetAngle = Math.mod(toAngleDist({
-						x: this.entities[idE].physicsBody.state.pos.x,
-						y: this.entities[idE].physicsBody.state.pos.y,
-					})["angle"] + Math.PI / 2, Math.PI * 2);
-					var currentAngle = Math.mod(this.entities[idE].physicsBody.state.angular.pos, 2 * Math.PI);
-					var toTarget = targetAngle - currentAngle;
-					this.entities[idE].physicsBody.state.angular.pos = this.entities[idE].physicsBody.state.angular.pos + toTarget;
-					this.entities[idE].physicsBody.state.angular.vel = 0;
-				}
-				else if (this.type == "flat") {
-					this.entities[idE].physicsBody.state.angular.pos = 0;
-					this.entities[idE].physicsBody.state.angular.vel = 0;
+
+				// Disabling entity rotation
+				if (!e.rotation) {
+					if (this.type == "circular") {
+						var targetAngle = Math.mod(toAngleDist({
+							x: e.physicsBody.state.pos.x,
+							y: e.physicsBody.state.pos.y,
+						})["angle"] + Math.PI / 2, Math.PI * 2);
+						var currentAngle = Math.mod(e.physicsBody.state.angular.pos, 2 * Math.PI);
+						var toTarget = targetAngle - currentAngle;
+						e.physicsBody.state.angular.pos = e.physicsBody.state.angular.pos + toTarget;
+						e.physicsBody.state.angular.vel = 0;
+					}
+					else if (this.type == "flat") {
+						e.physicsBody.state.angular.pos = 0;
+						e.physicsBody.state.angular.vel = 0;
+					}
 				}
 			}
 		}
@@ -265,7 +338,10 @@
 			behaviors: this.behaviors,
 			type: this.type,
 			limits: this.limits,
-			background: this.background
+			background: this.background,
+			gamemode: {
+				params: this.gamemode.params
+			}
 		};
 	};
 
@@ -294,6 +370,7 @@
 		}
 		this.spawn = (worldJSON.spawn) ? worldJSON.spawn : {x: 0, y: 0};
 		this.type = (worldJSON.type) ? worldJSON.type : "flat";
+		if (!this.gamemode) this.gamemode = Gamemodes.get(worldJSON.gamemode);
 
 
 		this.entitiesCount = worldJSON.entitiesCount || this.entitiesCount;
@@ -523,6 +600,31 @@
 
 	World.prototype.resetEventListener = function(event) {
 		this.events[event] = [];
+	};
+
+
+
+
+
+
+
+	World.prototype.playerActionStart = function(action, player) {
+		this.gamemode.playerActionStart(action, player);
+	};
+
+	World.prototype.playerActionStop = function(action, player) {
+		this.gamemode.playerActionStop(action, player);
+	};
+
+
+	World.prototype.keyDown = function(key, player) {
+		// body...
+		this.gamemode.keyDown(key);
+	};
+
+	World.prototype.keyUp = function(key, player) {
+		// body...
+		this.gamemode.keyUp(key);
 	};
 
 
