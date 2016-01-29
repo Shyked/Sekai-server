@@ -157,9 +157,15 @@
 		var previousSpeed;
 		var coeff;
 		var newSpeed;
+		var dec = this.gamemode.params.player.deceleration;
 		for (var idE in this.entities) {
 			e = this.entities[idE];
 			if (e.physicsBody) {
+				// Deceleration
+				e.physicsBody.state.vel.x = e.physicsBody.state.vel.x / (1 + dec);
+				e.physicsBody.state.vel.y = e.physicsBody.state.vel.y / (1 + dec);
+				e.physicsBody.state.angular.vel = e.physicsBody.state.angular.vel / (1 + dec);
+
 				// If the entity is moving
 				if (e.move.speed) {
 					e.physicsBody.sleep(false);
@@ -194,10 +200,10 @@
 							);
 						}
 
-						if (vel.x * Math.sign(displPos.x) < e.move.speed) {
+						if (this.gamemode.params.player.maxSpeedLimiter != "strict" || vel.x * Math.sign(displPos.x) < e.move.speed) {
 							vel.x += displPos.x;
 						}
-						if ((vel.y < e.move.speed || displPos.y < 0) && (vel.y > -e.move.speed || displPos.y > 0)) {
+						if (this.gamemode.params.player.maxSpeedLimiter != "strict" || vel.y * Math.sign(displPos.y) < e.move.speed) {
 							vel.y += displPos.y;
 						}
 
@@ -209,10 +215,10 @@
 							);
 						}
 						newSpeed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-						/*if (newSpeed > e.move.speed && newSpeed > previousSpeed) {
+						if (this.gamemode.params.player.maxSpeedLimiter == "normal" && newSpeed > e.move.speed && newSpeed > previousSpeed) {
 							vel.x *= previousSpeed / newSpeed;
 							vel.y *= previousSpeed / newSpeed;
-						}*/
+						}
 						e.physicsBody.state.vel.x = vel.x;
 						e.physicsBody.state.vel.y = vel.y;
 					}
@@ -368,8 +374,8 @@
 			}
 			this.behaviors = worldJSON.behaviors;
 		}
-		this.spawn = (worldJSON.spawn) ? worldJSON.spawn : {x: 0, y: 0};
-		this.type = (worldJSON.type) ? worldJSON.type : "flat";
+		if (worldJSON.spawn) this.spawn = worldJSON.spawn;
+		if (worldJSON.type) this.type = worldJSON.type;
 		if (!this.gamemode) this.gamemode = Gamemodes.get(worldJSON.gamemode);
 
 
