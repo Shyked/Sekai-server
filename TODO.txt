@@ -6,7 +6,8 @@ CHECK Correction restart
 
 Possibilité de choisir son skin
 Contraintes de distance (et d'autres trucs en rapport avec les physiques)
-
+Compte
+Player.addEntity => Broadcast du world entier, n'en faire qu'une partie
 
 CHECK Entités non physiques, décoration
 CHECK Gamemode
@@ -26,6 +27,20 @@ Chargement ?
 
 
 
+
+
+
+NOVA
+
+
+CHECK Envoyer l'état sleep d'une entité
+CHECK Bug images qui ne se chargent pas (dire au script de retourner si l'image est dans le world ou global, économie d'une requête)
+CHECK => Quand il doit charger deux fois la même texture, il y en a une qui n'apparaît pas !
+CHECK Gestion des claviers Qwerty, ou possibilité d'affecter ses propres touches
+CHECK Son
+CHECK Afficher des entités en plus
+CHECK Dessin des autres joueurs
+Revoir l'offset pour le placement des images du background
 
 
 

@@ -1,0 +1,8 @@
+{
+	"type": "Circle",
+	"radius": 110,
+	"texture": "nova",
+	"options": {
+		"restitution": 0.5
+	}
+}

@@ -314,6 +314,7 @@
 			Entity.copyState(this.physicsBody.state, entityJSON.state, true);
 			entityJSON.options = {};
 			Entity.copyOptions(this.physicsBody, entityJSON.options, true);
+			entityJSON.sleep = this.physicsBody.sleep();
 		}
 
 		for (var id in this) {
@@ -333,6 +334,7 @@
 		Entity.copyState(this.physicsBody.state, entityJSON.state, true);
 		entityJSON.options = {};
 		Entity.copyOptions(this.physicsBody, entityJSON.options, true);
+		entityJSON.sleep = this.physicsBody.sleep();
 
 		entityJSON.children = [];
 		for (var id in this.children) {
@@ -380,8 +382,10 @@
 		this.angle = entityJSON.angle;
 
 		for (var id in entityJSON) {
-			if (id != 'type' && id != 'smoothTeleport' && id != 'state') entity[id] = entityJSON[id];
+			if (id != 'type' && id != 'smoothTeleport' && id != 'state' && id != 'sleep') entity[id] = entityJSON[id];
 		}
+
+		if (typeof entityJSON.sleep == "boolean") this.physicsBody.sleep(entityJSON.sleep);
 
 		if (entityJSON.state) Entity.copyState(entityJSON.state, entity.physicsBody.state);
 		if (entityJSON.options) Entity.copyOptions(entityJSON.options, entity.physicsBody);
@@ -417,8 +421,10 @@
 		}
 
 		for (var id in entityJSON) {
-			if (id != 'type' && id != 'smoothTeleport' && id != 'state' && id != 'children') entity[id] = entityJSON[id];
+			if (id != 'type' && id != 'smoothTeleport' && id != 'state' && id != 'sleep' && id != 'children') entity[id] = entityJSON[id];
 		}
+
+		if (typeof entityJSON.sleep == "boolean") this.physicsBody.sleep(entityJSON.sleep);
 
 		if (entityJSON.state) Entity.copyState(entityJSON.state, entity.physicsBody.state);
 		if (entityJSON.options) Entity.copyOptions(entityJSON.options, entity.physicsBody);

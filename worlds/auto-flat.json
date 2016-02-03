@@ -13,10 +13,12 @@
 		"y": 0
 	},
 	"limits": [-3000, 3000],
-	"background_image": "auto-flat",
-	"background_color": "0x05081b",
-	"background_depth": 0.3,
-	"background_divisionSize": 512,
+	"background": {
+		"image": "auto-flat",
+		"color": "0x05081b",
+		"depth": 0.3,
+		"divisionSize": 512
+	},
 	"ground_depth": 100,
 	"ground_textures": [
 		"",

@@ -13,7 +13,7 @@ Clients.attachServer(server);
 
 
 
-Synchronizer.setStartingWorldId("auto-flat");
+Synchronizer.setStartingWorldId("nova");
 
 
 

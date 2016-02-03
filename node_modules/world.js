@@ -21,6 +21,14 @@
 
 
 
+	if (!Math.sign) {
+		Math.sign = function(n) {
+			return Math.abs(n) / n;
+		};
+	}
+
+
+
 
 
 
@@ -200,7 +208,7 @@
 							);
 						}
 
-						if (this.gamemode.params.player.maxSpeedLimiter != "strict" || vel.x * Math.sign(displPos.x) < e.move.speed) {
+						if (this.gamemode.params.player.maxSpeedLimiter != "strict" || vel.x * Math.abs(displPos.x) < e.move.speed) {
 							vel.x += displPos.x;
 						}
 						if (this.gamemode.params.player.maxSpeedLimiter != "strict" || vel.y * Math.sign(displPos.y) < e.move.speed) {
@@ -376,7 +384,7 @@
 		}
 		if (worldJSON.spawn) this.spawn = worldJSON.spawn;
 		if (worldJSON.type) this.type = worldJSON.type;
-		if (!this.gamemode) this.gamemode = Gamemodes.get(worldJSON.gamemode);
+		if (!this.gamemode) this.gamemode = Gamemodes.get(worldJSON.gamemode, this);
 
 
 		this.entitiesCount = worldJSON.entitiesCount || this.entitiesCount;
@@ -398,19 +406,6 @@
 
 		if (worldJSON.background) {
 			this.background = worldJSON.background;
-		}
-
-		if (worldJSON.background_image) {
-			this.background.image = worldJSON.background_image;
-		}
-		if (worldJSON.background_depth) {
-			this.background.depth = worldJSON.background_depth;
-		}
-		if (worldJSON.background_divisionSize) {
-			this.background.divisionSize = worldJSON.background_divisionSize;
-		}
-		if (worldJSON.background_color) {
-			this.background.color = worldJSON.background_color;
 		}
 
 		this.updateEntities(worldJSON.entities);

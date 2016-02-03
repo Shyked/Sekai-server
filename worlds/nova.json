@@ -5,10 +5,12 @@
 		"x": 0,
 		"y": 0
 	},
-	"background_image": "auto-flat",
-	"background_color": "0x05081b",
-	"background_depth": 0.3,
-	"background_divisionSize": 512,
+	"background": {
+		"image": "nova",
+		"color": "0x030a1b",
+		"depth": 0,
+		"divisionSize": 512
+	},
 	"entities": [
 		{
 			"type": "Decoration",
@@ -23,8 +25,7 @@
 			"y": 0,
 			"radius": 260,
 			"options": {
-				"treatment": "static",
-				"restitution": 0.8
+				"treatment": "static"
 			},
 			"style": {
 				"linesize": 0
