@@ -208,7 +208,7 @@
 							);
 						}
 
-						if (this.gamemode.params.player.maxSpeedLimiter != "strict" || vel.x * Math.abs(displPos.x) < e.move.speed) {
+						if (this.gamemode.params.player.maxSpeedLimiter != "strict" || vel.x * Math.sign(displPos.x) < e.move.speed) {
 							vel.x += displPos.x;
 						}
 						if (this.gamemode.params.player.maxSpeedLimiter != "strict" || vel.y * Math.sign(displPos.y) < e.move.speed) {
