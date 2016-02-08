@@ -8,7 +8,7 @@
 	"background": {
 		"image": "nova",
 		"color": "0x030a1b",
-		"depth": 0,
+		"depth": 0.3,
 		"divisionSize": 512
 	},
 	"entities": [

@@ -128,11 +128,10 @@
 
 		this.clientsId = [];
 
-		this.events = {
-			removeEntity: {
-				"count": 0
-			}
-		};
+		this.initEvents([
+			"removeEntity",
+			"afterStep"
+		]);
 
 
 		this.physicsWorld = Physics();
@@ -153,147 +152,29 @@
 	};
 
 
+	World.prototype.initEvents = function(events) {
+		this.events = {};
+		for (var id in events) {
+			this.events[events[id]] = {};
+			this.events[events[id]].count = 0;
+		}
+	};
+
+
 
 
 	World.prototype.afterStep = function(time) {
-		var e;
-		var displPos;
-		var displAngleDist;
-		var angleDistVel;
-		var angleDistPos;
-		var vel;
-		var previousSpeed;
-		var coeff;
-		var newSpeed;
-		var dec = this.gamemode.params.player.deceleration;
 		for (var idE in this.entities) {
-			e = this.entities[idE];
-			if (e.physicsBody) {
-				// Deceleration
-				e.physicsBody.state.vel.x = e.physicsBody.state.vel.x / (1 + dec);
-				e.physicsBody.state.vel.y = e.physicsBody.state.vel.y / (1 + dec);
-				e.physicsBody.state.angular.vel = e.physicsBody.state.angular.vel / (1 + dec);
+			this.entities[idE].applyDisplacements(this.type, this.gamemode.params.player.maxSpeedLimiter, this.limits, this.gamemode.params.player.deceleration);
+		}
+		this.triggerEvent("afterStep", null);
+		this.entitiesCheckpoint();
+	};
 
-				// If the entity is moving
-				if (e.move.speed) {
-					e.physicsBody.sleep(false);
 
-					displPos = {
-						x: 0,
-						y: 0
-					};
-					if (e.move.direction["up"]) displPos.y--;
-					if (e.move.direction["left"]) displPos.x--;
-					if (e.move.direction["down"]) displPos.y++;
-					if (e.move.direction["right"]) displPos.x++;
-					displAngleDist = toAngleDist(displPos);
-
-					if (displAngleDist.dist > 0) {
-						displAngleDist.dist = e.move.speed * e.move.acc;
-						vel = {
-							x: e.physicsBody.state.vel.x,
-							y: e.physicsBody.state.vel.y
-						};
-						previousSpeed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-						displPos = toXY(displAngleDist);
-						if (this.type == "circular") {
-							angleDistPos = toAngleDist({ // Get pos relative to the world
-								x: e.physicsBody.state.pos.x,
-								y: e.physicsBody.state.pos.y
-							});
-							vel = rotatePoint( // Velocity relative to the player
-								vel.x, vel.y,
-								- (angleDistPos.angle + Math.PI/2),
-								0, 0
-							);
-						}
-
-						if (this.gamemode.params.player.maxSpeedLimiter != "strict" || vel.x * Math.sign(displPos.x) < e.move.speed) {
-							vel.x += displPos.x;
-						}
-						if (this.gamemode.params.player.maxSpeedLimiter != "strict" || vel.y * Math.sign(displPos.y) < e.move.speed) {
-							vel.y += displPos.y;
-						}
-
-						if (this.type == "circular") {
-							vel = rotatePoint( // Velocity relative to the world
-								vel.x, vel.y,
-								(angleDistPos.angle + Math.PI/2),
-								0, 0
-							);
-						}
-						newSpeed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-						if (this.gamemode.params.player.maxSpeedLimiter == "normal" && newSpeed > e.move.speed && newSpeed > previousSpeed) {
-							vel.x *= previousSpeed / newSpeed;
-							vel.y *= previousSpeed / newSpeed;
-						}
-						e.physicsBody.state.vel.x = vel.x;
-						e.physicsBody.state.vel.y = vel.y;
-					}
-				}
-
-				// If the entity must jump
-				if (e.jump) {
-
-					if (this.type == "circular") {
-						var angleDistPos = toAngleDist({
-							x: e.physicsBody.state.pos.x,
-							y: e.physicsBody.state.pos.y
-						});
-						vel = rotatePoint(
-							e.physicsBody.state.vel.x, e.physicsBody.state.vel.y,
-							- (angleDistPos.angle + Math.PI/2),
-							0, 0
-						);
-						if (vel.y > -e.jump) vel.y = -e.jump;
-						vel = rotatePoint(
-							vel.x, vel.y,
-							(angleDistPos.angle + Math.PI/2),
-							0, 0
-						);
-					}
-					else if (this.type == "flat") {
-						vel = {
-							x: e.physicsBody.state.vel.x,
-							y: e.physicsBody.state.vel.y
-						};
-						if (vel.y > -e.jump) vel.y = -e.jump;
-					}
-					e.physicsBody.state.vel.x = vel.x;
-					e.physicsBody.state.vel.y = vel.y;
-
-					e.physicsBody.sleep(false);
-
-					e.jump = false;
-				}
-
-				// If the entity is a player and the world has limits
-				if (e.player && this.limits) {
-					if (e.physicsBody.state.pos.x < this.limits[0]
-						|| e.physicsBody.state.pos.x > this.limits[1]) {
-						e.physicsBody.state.pos.x = Math.min(Math.max(e.physicsBody.state.pos.x, this.limits[0]), this.limits[1]);
-						e.physicsBody.state.vel.x = 0;
-					}
-				}
-
-				// Disabling entity rotation
-				if (!e.rotation) {
-					if (this.type == "circular") {
-						var targetAngle = Math.mod(toAngleDist({
-							x: e.physicsBody.state.pos.x,
-							y: e.physicsBody.state.pos.y,
-						})["angle"] + Math.PI / 2, Math.PI * 2);
-						var currentAngle = Math.mod(e.physicsBody.state.angular.pos, 2 * Math.PI);
-						var toTarget = targetAngle - currentAngle;
-						e.physicsBody.state.angular.pos = e.physicsBody.state.angular.pos + toTarget;
-						e.physicsBody.state.angular.vel = 0;
-					}
-					else if (this.type == "flat") {
-						e.physicsBody.state.angular.pos = 0;
-						e.physicsBody.state.angular.vel = 0;
-					}
-				}
-			}
+	World.prototype.entitiesCheckpoint = function() {
+		for (var id in this.entities) {
+			this.entities[id].checkpoint();
 		}
 	};
 

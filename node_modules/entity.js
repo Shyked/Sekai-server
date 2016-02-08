@@ -77,32 +77,11 @@
 			acc: 0
 		};
 		this.jump = false;
+
+		this.prev = {};
 	};
 
 
-	Entity.Generic.prototype.getPos = function() {
-		if (this.type == "Decoration") {
-			return {
-				"x": this.x,
-				"y": this.y
-			};
-		}
-		else if (!this.type) {
-			return {x: 0, y: 0};
-		}
-		else {
-			return {
-				"x": this.physicsBody.state.pos.x,
-				"y": this.physicsBody.state.pos.y
-			};
-		}
-	};
-
-	Entity.Generic.prototype.getAngle = function() {
-		if (this.type == "Decoration") return 0;
-		else if (!this.type) return 0;
-		else return this.physicsBody.state.angular.pos;
-	};
 
 
 
@@ -135,7 +114,6 @@
 		this.width = width;
 		this.height = height;
 	};
-	Entity.Rectangle.prototype = new Entity.Generic();
 
 	Entity.Circle = function(p) {
 		this.init(p);
@@ -160,7 +138,6 @@
 
 		this.radius = radius;
 	}
-	Entity.Circle.prototype = new Entity.Generic();
 
 	Entity.Polygon = function(p) {
 		this.init(p);
@@ -198,7 +175,6 @@
 
 		this.vertices = vertices;
 	}
-	Entity.Polygon.prototype = new Entity.Generic();
 
 	Entity.Compound = function(p) {
 		this.init(p);
@@ -247,30 +223,6 @@
 			y: this.com.y
 		};
 	};
-	Entity.Compound.prototype = new Entity.Generic();
-
-	Entity.Compound.prototype.addChild = function(child) {
-		child = Entity.new(child);
-
-		child.id = this.childrenCount;
-		this.children[this.childrenCount] = child;
-		this.physicsBody.addChild(child.physicsBody);
-		this.childrenCount++;
-	};
-
-	Entity.Compound.prototype.refreshCom = function() {
-		this.physicsBody.refreshGeometry();
-		this.com = Physics.body.getCOM(this.physicsBody.children);
-		this.com = {
-			x: this.com.x,
-			y: this.com.y
-		};
-		var aabb = this.physicsBody.aabb();
-		this.textureCenter = {
-			x: aabb.x - this.physicsBody.state.pos.x,
-			y: aabb.y - this.physicsBody.state.pos.y
-		};
-	};
 
 
 	Entity.Decoration = function(p) {
@@ -278,16 +230,278 @@
 
 		var id = p.id,
 			x = p.x,
-			y = p.y;
+			y = p.y,
+			angle = p.angle;
 
 
 		this.type = 'Decoration';
 
 		this.x = x;
 		this.y = y;
+
+		this.angle = angle || 0;
 	};
+
+
+
+	Entity.Rectangle.prototype = new Entity.Generic();
+	Entity.Circle.prototype = new Entity.Generic();
+	Entity.Polygon.prototype = new Entity.Generic();
+	Entity.Compound.prototype = new Entity.Generic();
 	Entity.Decoration.prototype = new Entity.Generic();
 
+
+
+
+
+
+	/* GETTERS */
+
+	Entity.Generic.prototype.getPos = function() {
+		if (this.physicsBody) {
+			return {
+				"x": this.physicsBody.state.pos.x,
+				"y": this.physicsBody.state.pos.y
+			};			
+		}
+		else {
+			if (this.type) {
+				return {
+					x: this.x,
+					y: this.y
+				};
+			}
+			else return {x: 0, y: 0};
+		}
+	};
+
+	Entity.Generic.prototype.getAngle = function() {
+		if (this.physicsBody) {
+			return this.physicsBody.state.angular.pos;
+		}
+		else {
+			if (this.type) return this.angle;
+			else return 0;
+		}
+	};
+
+
+	/* SETTERS */
+
+	Entity.Generic.prototype.setPos = function(pos) {
+		if (this.physicsBody) {
+			var dx = pos.x - this.physicsBody.state.pos.x;
+			var dy = pos.y - this.physicsBody.state.pos.y;
+			this.physicsBody.state.pos.x += dx;
+			this.physicsBody.state.pos.y += dy;
+			this.physicsBody.state.old.pos.x += dx;
+			this.physicsBody.state.old.pos.y += dy;
+		}
+		else {
+			if (this.type) {
+				this.x = pos.x;
+				this.y = pos.y;
+			}
+		}
+	};
+
+	Entity.Generic.prototype.setAngle = function(angle) {
+		if (this.physicsBody) {
+			var dAngle = angle - this.physicsBody.state.angular.pos;
+			this.physicsBody.state.angular.pos += dAngle;
+			this.physicsBody.state.old.angular.pos += dAngle;
+		}
+		else {
+			if (this.type) {
+				this.angle = angle;
+			}
+		}
+	};
+
+
+
+
+	/* PERFORMANCE */
+
+	// Stores the state inside the prev property
+	Entity.Generic.prototype.checkpoint = function() {
+		var pos = this.getPos();
+		var angle = this.getAngle();
+		this.prev = {
+			x: pos.x,
+			y: pos.y,
+			angle: angle,
+			zIndex: this.zIndex,
+			texture: this.texture
+		};
+	};
+
+
+	// Will check if the entity has changed since the last checkpoint
+	Entity.Generic.prototype.hasChanged = function() {
+		var pos = this.getPos();
+		var angle = this.getAngle();
+		return !(this.prev.x == pos.x
+			&& this.prev.y == pos.y
+			&& this.prev.angle == angle
+			&& this.prev.zIndex == this.zIndex
+			&& this.prev.texture == this.texture
+			&& this.smoothTeleport.progress >= 1
+		);
+	};
+
+
+
+
+
+
+
+	/* DISPLACEMENTS */
+
+	Entity.Generic.prototype.applyDisplacements = function(worldType, maxSpeedLimiter, limits, dec) {
+		this.deceleration(dec);
+		if (this.move.speed) this.makeMove(worldType, maxSpeedLimiter);
+		if (this.jump) this.makeJump(worldType);
+		if (this.player && limits) this.checkLimits(limits);
+		if (!this.rotation) this.preventRotation();
+	};
+
+
+	Entity.Generic.prototype.deceleration = function(dec) {
+		if (this.physicsBody) {
+			this.physicsBody.state.vel.x = this.physicsBody.state.vel.x / (1 + dec);
+			this.physicsBody.state.vel.y = this.physicsBody.state.vel.y / (1 + dec);
+			this.physicsBody.state.angular.vel = this.physicsBody.state.angular.vel / (1 + dec);
+		}
+	};
+
+
+	Entity.Generic.prototype.makeMove = function(worldType, maxSpeedLimiter) {
+		if (this.physicsBody) {
+			this.physicsBody.sleep(false);
+
+			var displPos = {
+				x: 0,
+				y: 0
+			};
+			if (this.move.direction["up"]) displPos.y--;
+			if (this.move.direction["left"]) displPos.x--;
+			if (this.move.direction["down"]) displPos.y++;
+			if (this.move.direction["right"]) displPos.x++;
+			var displAngleDist = toAngleDist(displPos);
+
+			if (displAngleDist.dist > 0) {
+				displAngleDist.dist = this.move.speed * this.move.acc;
+				var vel = {
+					x: this.physicsBody.state.vel.x,
+					y: this.physicsBody.state.vel.y
+				};
+				var previousSpeed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+				displPos = toXY(displAngleDist);
+				var angleDistPos = {x: 0, y: 0};
+				if (worldType == "circular") {
+					angleDistPos = toAngleDist({ // Get pos relative to the world
+						x: this.physicsBody.state.pos.x,
+						y: this.physicsBody.state.pos.y
+					});
+					vel = rotatePoint( // Velocity relative to the player
+						vel.x, vel.y,
+						- (angleDistPos.angle + Math.PI/2),
+						0, 0
+					);
+				}
+
+				if (maxSpeedLimiter != "strict" || vel.x * Math.sign(displPos.x) < this.move.speed) {
+					vel.x += displPos.x;
+				}
+				if (maxSpeedLimiter != "strict" || vel.y * Math.sign(displPos.y) < this.move.speed) {
+					vel.y += displPos.y;
+				}
+
+				if (worldType == "circular") {
+					vel = rotatePoint( // Velocity relative to the world
+						vel.x, vel.y,
+						(angleDistPos.angle + Math.PI/2),
+						0, 0
+					);
+				}
+				var newSpeed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+				if (maxSpeedLimiter == "normal" && newSpeed > this.move.speed && newSpeed > previousSpeed) {
+					vel.x *= previousSpeed / newSpeed;
+					vel.y *= previousSpeed / newSpeed;
+				}
+				this.physicsBody.state.vel.x = vel.x;
+				this.physicsBody.state.vel.y = vel.y;
+			}
+		}
+	};
+
+	Entity.Generic.prototype.makeJump = function(worldType) {
+		if (this.physicsBody) {
+
+			var vel = {x:0, y: 0};
+			if (worldType == "circular") {
+				var angleDistPos = toAngleDist({
+					x: e.physicsBody.state.pos.x,
+					y: e.physicsBody.state.pos.y
+				});
+				vel = rotatePoint(
+					this.physicsBody.state.vel.x, this.physicsBody.state.vel.y,
+					- (angleDistPos.angle + Math.PI/2),
+					0, 0
+				);
+				if (vel.y > -this.jump) vel.y = -this.jump;
+				vel = rotatePoint(
+					vel.x, vel.y,
+					(angleDistPos.angle + Math.PI/2),
+					0, 0
+				);
+			}
+			else if (worldType == "flat") {
+				vel = {
+					x: this.physicsBody.state.vel.x,
+					y: this.physicsBody.state.vel.y
+				};
+				if (vel.y > -this.jump) vel.y = -this.jump;
+			}
+			this.physicsBody.state.vel.x = vel.x;
+			this.physicsBody.state.vel.y = vel.y;
+
+			this.physicsBody.sleep(false);
+
+			this.jump = false;
+		}
+	};
+
+	Entity.Generic.prototype.checkLimits = function(limits) {
+		var pos = this.getPos();
+		if (pos.x < this.limits[0] || pos.x > this.limits[1]) {
+			this.setPos({
+				x: Math.min(Math.max(e.physicsBody.state.pos.x, this.limits[0]), this.limits[1]),
+				y: pos.y
+			});
+			if (this.physicsBody) this.physicsBody.state.vel.x = 0;
+		}
+	};
+
+	Entity.Generic.prototype.preventRotation = function(worldType) {
+		if (worldType == "circular") {
+			var pos = this.getPos();
+			var angle = this.getAngle();
+			var targetAngle = Math.mod(toAngleDist({
+				x: pos.x,
+				y: pos.y
+			})["angle"] + Math.PI / 2, Math.PI * 2);
+			var currentAngle = Math.mod(angle, 2 * Math.PI);
+			var toTarget = targetAngle - currentAngle;
+			this.setAngle(angle + toTarget);
+			if (this.physicsBody) this.physicsBody.state.angular.vel = 0;
+		}
+		else if (this.type == "flat") {
+			this.setAngle(0);
+			if (this.physicsBody) this.physicsBody.state.angular.vel = 0;
+		}
+	};
 
 
 
@@ -328,6 +542,77 @@
 		return entityJSON;
 	};
 
+
+
+
+	/* UPDATE */
+
+	Entity.Generic.prototype.update = function(entityJSON) {
+		var entity = this;
+		var deltaAdd = {
+			x: 0,
+			y: 0
+		}
+		if (entity.smoothTeleport.progress != 1) {
+			deltaAdd.x = entity.smoothTeleport.positionDelta.x * entity.smoothTeleport.progressSinus;
+			deltaAdd.y = entity.smoothTeleport.positionDelta.y * entity.smoothTeleport.progressSinus;
+		}
+		var pos = this.getPos();
+		var angle = this.getAngle();
+		entity.smoothTeleport = {
+			angleDelta: angle - entityJSON.angle,
+			positionDelta: {
+				x: pos.x - entityJSON.x + deltaAdd.x,
+				y: pos.y - entityJSON.y + deltaAdd.y
+			},
+			progress: 0,
+			progressSinus: 1
+		};
+		this.x = entityJSON.x;
+		this.y = entityJSON.y;
+		this.angle = entityJSON.angle;
+
+		for (var id in entityJSON) {
+			if (id != 'type' && id != 'smoothTeleport' && id != 'state' && id != 'sleep') entity[id] = entityJSON[id];
+		}
+
+		if (typeof entityJSON.sleep == "boolean") this.physicsBody.sleep(entityJSON.sleep);
+
+		if (entityJSON.state) Entity.copyState(entityJSON.state, entity.physicsBody.state);
+		if (entityJSON.options) Entity.copyOptions(entityJSON.options, entity.physicsBody);
+	}
+
+
+
+
+
+
+	/* TYPE SPECIFIC */
+
+
+	Entity.Compound.prototype.addChild = function(child) {
+		child = Entity.new(child);
+
+		child.id = this.childrenCount;
+		this.children[this.childrenCount] = child;
+		this.physicsBody.addChild(child.physicsBody);
+		this.childrenCount++;
+	};
+
+	Entity.Compound.prototype.refreshCom = function() {
+		this.physicsBody.refreshGeometry();
+		this.com = Physics.body.getCOM(this.physicsBody.children);
+		this.com = {
+			x: this.com.x,
+			y: this.com.y
+		};
+		var aabb = this.physicsBody.aabb();
+		this.textureCenter = {
+			x: aabb.x - this.physicsBody.state.pos.x,
+			y: aabb.y - this.physicsBody.state.pos.y
+		};
+	};
+
 	Entity.Compound.prototype.export = function() {
 		var entityJSON = {};
 		entityJSON.state = {};
@@ -348,48 +633,6 @@
 		entityJSON.y = this.physicsBody.state.pos.y;
 		return entityJSON;
 	};
-
-
-
-
-
-
-	/* UPDATE */
-
-	Entity.Generic.prototype.update = function(entityJSON) {
-		var entity = this;
-		var deltaAdd = {
-			x: 0,
-			y: 0
-		}
-		if (entity.smoothTeleport.progress != 1) {
-			deltaAdd.x = entity.smoothTeleport.positionDelta.x * entity.smoothTeleport.progressSinus;
-			deltaAdd.y = entity.smoothTeleport.positionDelta.y * entity.smoothTeleport.progressSinus;
-		}
-		var pos = this.getPos();
-		var angle = this.getAngle();
-		entity.smoothTeleport = {
-			angleDelta: angle - entityJSON.angle, // Revoir l'export qui envoit l'angle via le state, il devrait l'envoyer autrement
-			positionDelta: { // Ou alors, faire une condition pour vérifier si y'a un state ou non, et donc si on doit le prendre en compte
-				x: pos.x - entityJSON.x + deltaAdd.x, // Ajouter un angle pour les déco
-				y: pos.y - entityJSON.y + deltaAdd.y
-			},
-			progress: 0,
-			progressSinus: 1
-		};
-		this.x = entityJSON.x;
-		this.y = entityJSON.y;
-		this.angle = entityJSON.angle;
-
-		for (var id in entityJSON) {
-			if (id != 'type' && id != 'smoothTeleport' && id != 'state' && id != 'sleep') entity[id] = entityJSON[id];
-		}
-
-		if (typeof entityJSON.sleep == "boolean") this.physicsBody.sleep(entityJSON.sleep);
-
-		if (entityJSON.state) Entity.copyState(entityJSON.state, entity.physicsBody.state);
-		if (entityJSON.options) Entity.copyOptions(entityJSON.options, entity.physicsBody);
-	}
 
 	Entity.Compound.prototype.update = function(entityJSON) {
 		var entity = this;
@@ -495,6 +738,10 @@
 
 
 
+
+
+
+
 	// CommonJS module
 	if (typeof exports !== 'undefined') {
 	    exports.Entity = Entity;
@@ -504,5 +751,51 @@
 	if (typeof window === 'object' && typeof window.document === 'object') {
 	    window.Entity = Entity;
 	}
+
+
+
+
+
+	// Lib
+
+	function toAngleDist(pos) {
+		if (pos.x != 0 || pos.y != 0) {
+			var dist = Math.sqrt(pos.x * pos.x + pos.y * pos.y);
+			var angle = Math.acos(pos.x / dist);
+			if (pos.y < 0) angle = -angle;
+			return {
+				angle: angle,
+				dist: dist
+			};
+		}
+		else {
+			return {
+				angle: 0,
+				dist: 0
+			};
+		}
+	}
+
+	function toXY(angleDist) {
+		var x = Math.cos(angleDist.angle) * angleDist.dist;
+		var y = Math.sin(angleDist.angle) * angleDist.dist;
+		return {
+			x: x,
+			y: y
+		};
+	}
+
+	function rotatePoint(x, y, angle, centerX, centerY) { // http://stackoverflow.com/questions/11332188/javascript-rotation-translation-function
+		x -= centerX;
+		y -= centerY;
+		var point = {};
+		point.x = x * Math.cos(angle) - y * Math.sin(angle);
+		point.y = x * Math.sin(angle) + y * Math.cos(angle);
+		point.x += centerX;
+		point.y += centerY;
+		return point;
+	}
+
+
 
 })();

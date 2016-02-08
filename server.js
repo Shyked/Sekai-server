@@ -23,10 +23,20 @@ console.log("Server started");
 
 
 
+/*var request = require("request");
+
+request("http://lenovo-pc:8888/nodejs/ex/query/getWorldFiles.php?world=nova", function(error, response, body) {
+    console.log(error);
+    console.log(body);
+});*/
 
 
 
-/* From Ogar */
+
+
+
+
+/* From Ogar : CLI */
 
 var readline = require('readline');	
 var in_ = readline.createInterface({ input: process.stdin, output: process.stdout });

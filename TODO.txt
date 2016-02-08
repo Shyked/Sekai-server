@@ -1,10 +1,11 @@
 Serveur :
 
 (plus tard) Anticheat (empêcher de traverer les murs (tant que possible))
+	Créer une map de zones impossibles à traverser et véifier qu'aucune collision n'a lieu entre les deux lors des téléportations côté serveur
 CHECK Correction restart
-  (clear) Restructurer un peu mieux : Créer une fonction pour quitter un monde
+	(clear) Restructurer un peu mieux : Créer une fonction pour quitter un monde
 
-Possibilité de choisir son skin
+Possibilité de choisir son skin (Dépend du gamemode, faire les comptes avant ?)
 Contraintes de distance (et d'autres trucs en rapport avec les physiques)
 Compte
 Player.addEntity => Broadcast du world entier, n'en faire qu'une partie
@@ -21,7 +22,8 @@ Client :
 
 Éditeur de monde
 Menu pause avec options de performance
-Chargement ?
+CHECK Chargement ?
+Message connexion au serveur en cours
 
 
 
@@ -40,7 +42,7 @@ CHECK Gestion des claviers Qwerty, ou possibilité d'affecter ses propres touches
 CHECK Son
 CHECK Afficher des entités en plus
 CHECK Dessin des autres joueurs
-Revoir l'offset pour le placement des images du background
+CHECK Revoir l'offset pour le placement des images du background
 
 
 
@@ -48,5 +50,18 @@ Revoir l'offset pour le placement des images du background
 
 
 Idées :
+¯¯¯¯¯¯¯
+
+Modes de jeu :
+
 Mode de jeu RP, un MJ désigné a le droit de faire pop des entités et modifier des règles
 Creepy pasta
+Éliatrop
+
+
+Diverses :
+
+"Fées", entités qui ne touchent pas le sol, qui freinent à l'approche du sol
+IA, possibilité au gamemode de contrôler les entités sur un before et after step
+Filtres
+Effets spéciaux
