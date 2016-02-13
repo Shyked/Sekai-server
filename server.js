@@ -13,7 +13,7 @@ Clients.attachServer(server);
 
 
 
-Synchronizer.setStartingWorldId("nova");
+Synchronizer.setStartingWorldId("planets");
 
 
 

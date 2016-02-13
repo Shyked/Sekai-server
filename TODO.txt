@@ -13,6 +13,7 @@ Player.addEntity => Broadcast du world entier, n'en faire qu'une partie
 CHECK Entités non physiques, décoration
 CHECK Gamemode
 
+CHECK Planètes
 
 
 
@@ -24,6 +25,7 @@ Client :
 Menu pause avec options de performance
 CHECK Chargement ?
 Message connexion au serveur en cours
+Fuite de mémoire au bout de plusieurs chargements de monde
 
 
 

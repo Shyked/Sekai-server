@@ -118,6 +118,8 @@
 		this.spawn = null;
 		this.type = null;
 		this.limits = null;
+		this.planets = null;
+		this.origin = null;
 		this.gamemode = null;
 		this.background = {
 			"image": null,
@@ -130,20 +132,26 @@
 
 		this.initEvents([
 			"removeEntity",
-			"afterStep"
+			"afterStep",
+			"collision"
 		]);
 
 
 		this.physicsWorld = Physics();
 
+		var world = this;
+
 		// ensure objects bounce when edge collision is detected
+		var collision = Physics.behavior('body-collision-detection');
+		this.physicsWorld.on(collision.options.channel, function(data, e) {
+			world.collision(data);
+		});
+		this.physicsWorld.add(collision);
 		this.physicsWorld.add(Physics.behavior('body-impulse-response'));
-		this.physicsWorld.add(Physics.behavior('body-collision-detection'));
 		this.physicsWorld.add(Physics.behavior('sweep-prune'));
 
 
 		var physicsWorld = this.physicsWorld;
-		var world = this;
 		Physics.util.ticker.on(function(time, dt) {
 			physicsWorld.step(time);
 			world.afterStep(time);
@@ -165,7 +173,24 @@
 
 	World.prototype.afterStep = function(time) {
 		for (var idE in this.entities) {
-			this.entities[idE].applyDisplacements(this.type, this.gamemode.params.player.maxSpeedLimiter, this.limits, this.gamemode.params.player.deceleration);
+			if (this.type == "circular") {
+				var minDist = null;
+				var minDistId = null;
+				for (var idP in this.planets) {
+					var pos = this.entities[idE].getPos();
+					var dist = 	Math.sqrt(
+									(this.planets[idP].pos.x - pos.x) * (this.planets[idP].pos.x - pos.x)
+									+ (this.planets[idP].pos.y - pos.y) * (this.planets[idP].pos.y - pos.y))
+								- this.planets[idP].radius;
+					if (minDist === null || dist < minDist) {
+						minDist = dist;
+						minDistId = idP;
+					}
+				}
+				var origin = this.planets[minDistId].pos;
+				this.origin = origin;
+			}
+			this.entities[idE].applyDisplacements(this.type, this.gamemode.params.player.maxSpeedLimiter, this.limits, this.gamemode.params.player.deceleration, origin);
 		}
 		this.triggerEvent("afterStep", null);
 		this.entitiesCheckpoint();
@@ -180,6 +205,18 @@
 
 
 
+	World.prototype.collision = function(data) {
+		for (var id in data.collisions) {
+			this.triggerEvent("collision", {
+				"entityA": data.collisions[id].bodyA.entity,
+				"entityB": data.collisions[id].bodyB.entity,
+				"data": data.collisions[id]
+			})
+		}
+	};
+
+
+
 
 	/**
 	 * addEntity()
@@ -188,24 +225,223 @@
 	 * @param properties array Other properties that helps to construct the entity.
 	 */
 	World.prototype.addEntity = function(properties, addToWorld) {
-		if (addToWorld === undefined) addToWorld = true;
-		var entity;
-		var id = this.entitiesCount++;
-		if (!properties.options) properties.options = {};
-
-		properties.id = id;
-		entity = new Entity[properties.type](properties);
-
-		if (addToWorld) {
-			try {
-				this.physicsWorld.add(entity.physicsBody);
+		if (properties instanceof Array) {
+			var entities = [];
+			for (var idP in properties) {
+				entities.push(this.addEntity(properties[idP]));
 			}
-			catch(e) {
-				console.log(e);
-			}
+			return entities;
 		}
-		this.entities[id] = entity;
-		return entity;
+		else {
+			if (addToWorld === undefined) addToWorld = true;
+			var entity;
+			var id = this.entitiesCount++;
+
+			properties.id = id;
+			entity = new Entity[properties.type](properties);
+
+			if (addToWorld) {
+				try {
+					this.physicsWorld.add(entity.physicsBody);
+				}
+				catch(e) {
+					console.log(e);
+				}
+			}
+			this.entities[id] = entity;
+			return entity;
+		}
+	};
+
+
+	World.prototype.removeEntity = function(entityId) {
+		this.triggerEvent('removeEntity', entityId);
+		if (this.entities[entityId].physicsBody) this.physicsWorld.remove(this.entities[entityId].physicsBody);
+		delete this.entities[entityId];
+	};
+
+
+
+
+
+
+
+
+
+
+	World.prototype.generateGround = function(ground) {
+
+		var world = this;
+
+		var createPart = function(pos, prevPos) {
+			if (world.type == "circular") {
+				var underPos = toAngleDist(pos);
+				underPos.dist -= depth;
+				underPos = toXY(underPos);
+				var underPrevPos = toAngleDist(prevPos);
+				underPrevPos.dist -= depth;
+				underPrevPos = toXY(underPrevPos);
+				return {
+					"type": "Polygon",
+					"vertices": [
+						{x: prevPos.x, y: prevPos.y},
+						{x: pos.x, y: pos.y},
+						{x: underPos.x, y: underPos.y},
+						{x: underPrevPos.x, y: underPrevPos.y}
+					],
+					"options": {
+						"treatment": "static",
+						"cof": 0.8,
+						"restitution": 1
+					}
+				};
+			}
+			else if (world.type == "flat") {
+				return {
+					"type": "Polygon",
+					"vertices": [
+						{x: prevPos.x, y: prevPos.y},
+						{x: pos.x, y: pos.y},
+						{x: pos.x, y: pos.y + depth},
+						{x: prevPos.x, y: prevPos.y + depth}
+					],
+					"options": {
+						"treatment": "static",
+						"cof": 0.8,
+						"restitution": 1
+					}
+				}
+			}
+		};
+
+		var createCompound = function(children, texture, textureOffset, positions, offset) {
+			var entity = world.addEntity({
+				"type": "Compound",
+				"hiddenChildren": ((texture)?true:false),
+				"options": {
+					"treatment": "static",
+					"cof": 0.8,
+					"restitution": 1
+				}
+			}, false);
+			if (texture) entity.texture = texture;
+			if (textureOffset) entity.textureOffset = textureOffset;
+
+			for (var idC in children) {
+				var child = Entity.new(children[idC]);
+				entity.addChild(child);
+				var b = entity.children[idC].physicsBody;
+				b.state.pos.x = b.state.pos.x - (b.geometry.vertices[0].x - positions[idC].x);
+				b.state.pos.y = b.state.pos.y - (b.geometry.vertices[0].y - positions[idC].y);
+			}
+			world.physicsWorld.add(entity.physicsBody);
+
+			entity.refreshCom();
+			
+			entity.physicsBody.state.pos.x = entity.physicsBody.state.pos.x + entity.com.x + offset.x;
+			entity.physicsBody.state.pos.y = entity.physicsBody.state.pos.y + entity.com.y + offset.y;
+
+			for (var idC in entity.physicsBody.children) {
+				var child = entity.physicsBody.children[idC];
+				if (child.geometry.vertices) {
+					child.state.pos.x = child.state.pos.x - entity.com.x;
+					child.state.pos.y = child.state.pos.y - entity.com.y;
+				}
+			}
+
+			entity.refreshCom();
+		};
+
+
+
+		if (this.type == "circular") this.planets = [];
+
+
+		for (var idG in ground) {
+
+			var g = ground[idG];
+
+			var offset = {
+				x: g.x,
+				y: g.y
+			};
+			if (this.type == "circular") {
+				var radius = (this.type == "circular") ? g.radius : null;
+				var attractor = (this.type == "circular") ? g.attractor : null;
+				this.planets.push({
+					"pos": offset,
+					"radius": radius
+				});
+			}
+			var depth = g.depth || GROUND_DEPTH;
+			var parts = g.parts;
+
+			if (attractor) {
+				attractor.pos = {
+					x: offset.x,
+					y: offset.y
+				};
+				this.physicsWorld.add(Physics.behavior('attractor', attractor));
+				if (!this.behaviors) this.behaviors = [];
+				if (!this.behaviors.attractors) this.behaviors.attractors = [];
+				this.behaviors.attractors.push(attractor);
+			}
+
+			var prevPos = null;
+			var firstPos = null;
+			var children = [];
+			var texture = "";
+			var textureOffset = {};
+			var positions = [];
+
+			for (var idP in parts) {
+
+				if (children.length > 0) createCompound(children, texture, textureOffset, positions, offset);
+
+				var elevation = parts[idP].elevation;
+
+				children = [];
+				positions = [];
+				prevPos = null;
+
+				for (var idE in elevation) {
+
+					var e = elevation[idE];
+
+					if (this.type == "circular") {
+						var pos = rotatePoint(
+							radius + e[1],
+							0,
+							(e[0] / 100) * Math.PI * 2,
+							0,
+							0
+						);
+					}
+					else if (this.type == "flat") {
+						var pos = {
+							x: e[0],
+							y: e[1]
+						};
+					}
+					positions.push(pos);
+
+					if (prevPos) {
+						var child = createPart(pos, prevPos, depth);
+						children.push(child);
+					}
+					prevPos = pos;
+
+				}
+
+				texture = parts[idP].texture;
+				textureOffset = parts[idP].textureOffset;
+
+			}
+
+			createCompound(children, texture, textureOffset, positions, offset);
+
+		}
+
 	};
 
 
@@ -233,6 +469,7 @@
 			behaviors: this.behaviors,
 			type: this.type,
 			limits: this.limits,
+			planets: this.planets,
 			background: this.background,
 			gamemode: {
 				params: this.gamemode.params
@@ -272,16 +509,20 @@
 
 		if (worldJSON.ground) {
 			try {
-				this.generateGround(worldJSON.ground, worldJSON.ground_textures, worldJSON.ground_textureOffsets, worldJSON.type, worldJSON.ground_depth); 
-			}
-			catch (e) {
+				this.generateGround(worldJSON.ground);
+			} catch (e) {
 				console.error(e);
+				throw e;
 			}
 		}
 
 
 		if (worldJSON.limits) {
 			if (worldJSON.limits[0] < worldJSON.limits[1]) this.limits = worldJSON.limits;
+		}
+
+		if (worldJSON.planets) {
+			this.planets = worldJSON.planets;
 		}
 
 
@@ -293,140 +534,6 @@
 	};
 
 
-
-
-	World.prototype.generateGround = function(ground, textures, textureOffsets, type, groundDepth) {
-		textures = (textures)?textures:[];
-		textureOffsets = (textureOffsets)?textureOffsets:[];
-		ground = (ground)?ground:[];
-		groundDepth = (groundDepth)?groundDepth:GROUND_DEPTH;
-
-		var world = this;
-
-		var createPart = function(pos, prevPos) {
-			if (type == "circular") {
-				var underPos = toAngleDist(pos);
-				underPos.dist -= GROUND_DEPTH;
-				underPos = toXY(underPos);
-				var underPrevPos = toAngleDist(prevPos);
-				underPrevPos.dist -= GROUND_DEPTH;
-				underPrevPos = toXY(underPrevPos);
-				return {
-					"type": "Polygon",
-					"vertices": [
-						{x: prevPos.x, y: prevPos.y},
-						{x: pos.x, y: pos.y},
-						{x: underPos.x, y: underPos.y},
-						{x: underPrevPos.x, y: underPrevPos.y}
-					],
-					"options": {
-						"treatment": "static",
-						"cof": 0.8,
-						"restitution": 0.5
-					}
-				};
-			}
-			else if (type == "flat") {
-				return {
-					"type": "Polygon",
-					"vertices": [
-						{x: prevPos.x, y: prevPos.y},
-						{x: pos.x, y: pos.y},
-						{x: pos.x, y: pos.y + groundDepth},
-						{x: prevPos.x, y: prevPos.y + groundDepth}
-					],
-					"options": {
-						"treatment": "static",
-						"cof": 0.8,
-						"restitution": 0.5
-					}
-				}
-			}
-		};
-
-		var createCompound = function(children, texture, textureOffset, positions) {
-
-			var entity = world.addEntity({
-				"type": "Compound",
-				"hiddenChildren": ((texture)?true:false),
-				"options": {
-					"treatment": "static",
-					"cof": 0.8,
-					"restitution": 0.5
-				}
-			}, false);
-			if (texture) entity.texture = texture;
-			if (textureOffset) entity.textureOffset = textureOffset;
-
-			for (var idC in children) {
-				var child = Entity.new(children[idC]);
-				entity.addChild(child);
-				var b = entity.children[idC].physicsBody;
-				b.state.pos.x = b.state.pos.x - (b.geometry.vertices[0].x - positions[idC].x);
-				b.state.pos.y = b.state.pos.y - (b.geometry.vertices[0].y - positions[idC].y);
-			}
-			world.physicsWorld.add(entity.physicsBody);
-
-			entity.refreshCom();
-			
-			entity.physicsBody.state.pos.x = entity.physicsBody.state.pos.x + entity.com.x;
-			entity.physicsBody.state.pos.y = entity.physicsBody.state.pos.y + entity.com.y;
-
-			for (var idC in entity.physicsBody.children) {
-				var child = entity.physicsBody.children[idC];
-				if (child.geometry.vertices) {
-					child.state.pos.x = child.state.pos.x - entity.com.x;
-					child.state.pos.y = child.state.pos.y - entity.com.y;
-				}
-			}
-
-			entity.refreshCom();
-		};
-
-
-		var prevPos = null;
-		var firstPos = null;
-		var children = [];
-		var texture = "";
-		var textureOffset = {};
-		var positions = [];
-		for (var idG in ground) {
-			if (children.length > 0) createCompound(children, texture, textureOffset, positions);
-			var part = ground[idG];
-			children = [];
-			positions = [];
-			prevPos = null;
-			for (var idP in part) {
-				if (type == "circular") {
-					var pos = rotatePoint(
-						part[idP][1],
-						0,
-						(part[idP][0] / 100) * Math.PI * 2,
-						0,
-						0
-					);
-				}
-				else if (type == "flat") {
-					var pos = {
-						x: part[idP][0],
-						y: part[idP][1]
-					};
-				}
-				positions.push(pos);
-				if (prevPos) {
-					var child = createPart(pos, prevPos);
-					children.push(child);
-				}
-
-				prevPos = pos;
-			}
-			texture = textures[idG];
-			textureOffset = textureOffsets[idG];
-		}
-
-		createCompound(children, texture, textureOffset, positions);
-
-	};
 
 	/**
 	 * updateEntities()
@@ -442,19 +549,17 @@
 				this.entities[entitiesJSON[id].id].update(entitiesJSON[id]);
 			}
 			else { // new Entity
-				entity = Entity.import(entitiesJSON[id]);
-				this.entities[entity.id] = entity;
-				if (entity.physicsBody) physicsBodies.push(entity.physicsBody);
+				if (entitiesJSON[id].id == undefined) {
+					this.addEntity(entitiesJSON[id]);
+				}
+				else {
+					entity = Entity.import(entitiesJSON[id]);
+					this.entities[entity.id] = entity;
+					if (entity.physicsBody) physicsBodies.push(entity.physicsBody);
+				}
 			}
 		}
 		this.physicsWorld.add(physicsBodies);
-	};
-
-
-	World.prototype.removeEntity = function(entityId) {
-		this.triggerEvent('removeEntity', entityId);
-		if (this.entities[entityId].physicsBody) this.physicsWorld.remove(this.entities[entityId].physicsBody);
-		delete this.entities[entityId];
 	};
 
 
@@ -500,12 +605,10 @@
 
 
 	World.prototype.keyDown = function(key, player) {
-		// body...
 		this.gamemode.keyDown(key);
 	};
 
 	World.prototype.keyUp = function(key, player) {
-		// body...
 		this.gamemode.keyUp(key);
 	};
 

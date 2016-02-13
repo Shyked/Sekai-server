@@ -1,0 +1,75 @@
+[
+	{
+		"type": "Compound",
+		"x": -3,
+		"y": 0,
+		"texture": "trampoline",
+		"hiddenChildren": true,
+		"children": [
+			{
+				"type": "Rectangle",
+				"x": -30,
+				"y": 0,
+				"width": 60,
+				"height": 120
+			},
+			{
+				"type": "Polygon",
+				"x": 0,
+				"y": -18,
+				"vertices": [
+					{"x": -5, "y": -60},
+					{"x": 10, "y": -60},
+					{"x": -5, "y": 60}
+				]
+			},
+			{
+				"type": "Polygon",
+				"x": 0,
+				"y": 18,
+				"vertices": [
+					{"x": -5, "y": 60},
+					{"x": 10, "y": 60},
+					{"x": -5, "y": -60}
+				]
+			},
+			{
+				"type": "Rectangle",
+				"x": 10,
+				"y": 55,
+				"width": 50,
+				"height": 10
+			},
+			{
+				"type": "Rectangle",
+				"x": 10,
+				"y": -55,
+				"width": 50,
+				"height": 10
+			}
+		],
+		"options": {
+			"restitution": 1,
+			"treatment": "static"
+		}
+	},
+	{
+		"type": "Rectangle",
+		"x": 0,
+		"y": 0,
+		"width": 10,
+		"height": 80,
+		"gamemode": {
+			"default": {
+				"trampoline": {
+					"power": 2,
+					"stayTime": 100
+				}
+			}
+		},
+		"options": {
+			"treatment": "static",
+			"restitution": 0.5
+		}
+	}
+]
