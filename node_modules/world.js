@@ -73,6 +73,7 @@
 	Worlds.prototype.delete = function(id) {
 		if (id instanceof World) id = id.id;
 		this.worlds[id].physicsWorld.destroy();
+		Physics.util.ticker.off(this.worlds[id].onTick);
 		this.worlds[id] = null;
 		delete this.worlds[id];
 		this.count--;
@@ -152,10 +153,11 @@
 
 
 		var physicsWorld = this.physicsWorld;
-		Physics.util.ticker.on(function(time, dt) {
+		this.onTick = function(time, dt) {
 			physicsWorld.step(time);
 			world.afterStep(time);
-		});
+		}
+		Physics.util.ticker.on(this.onTick);
 		Physics.util.ticker.start();
 	};
 
@@ -188,9 +190,9 @@
 					}
 				}
 				var origin = this.planets[minDistId].pos;
-				this.origin = origin;
+				this.entities[idE].origin = origin;
 			}
-			this.entities[idE].applyDisplacements(this.type, this.gamemode.params.player.maxSpeedLimiter, this.limits, this.gamemode.params.player.deceleration, origin);
+			this.entities[idE].applyDisplacements(this.type, this.gamemode.params.player.maxSpeedLimiter, this.limits, this.gamemode.params.player.deceleration);
 		}
 		this.triggerEvent("afterStep", null);
 		this.entitiesCheckpoint();

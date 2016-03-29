@@ -73,6 +73,8 @@
 		this.rotation = (rotation != undefined) ? rotation : true;
 		p.rotation = undefined;
 
+		this.origin = {x: 0, y: 0};
+
 		// Gamemode specifics params (associative array)
 		this.gamemode = gamemode;
 
@@ -373,12 +375,12 @@
 
 	/* DISPLACEMENTS */
 
-	Entity.Generic.prototype.applyDisplacements = function(worldType, maxSpeedLimiter, limits, dec, origin) {
+	Entity.Generic.prototype.applyDisplacements = function(worldType, maxSpeedLimiter, limits, dec) {
 		this.deceleration(dec);
-		if (this.move.speed) this.makeMove(worldType, maxSpeedLimiter, origin);
-		if (this.jump) this.makeJump(worldType, origin);
+		if (this.move.speed) this.makeMove(worldType, maxSpeedLimiter);
+		if (this.jump) this.makeJump(worldType);
 		if (this.player && limits) this.checkLimits(limits);
-		if (!this.rotation) this.preventRotation();
+		if (!this.rotation) this.preventRotation(worldType);
 	};
 
 
@@ -391,7 +393,7 @@
 	};
 
 
-	Entity.Generic.prototype.makeMove = function(worldType, maxSpeedLimiter, origin) {
+	Entity.Generic.prototype.makeMove = function(worldType, maxSpeedLimiter) {
 		if (this.physicsBody) {
 			this.physicsBody.sleep(false);
 
@@ -416,8 +418,8 @@
 				var angleDistPos = {x: 0, y: 0};
 				if (worldType == "circular") {
 					angleDistPos = toAngleDist({ // Get pos relative to the world
-						x: this.physicsBody.state.pos.x - origin.x,
-						y: this.physicsBody.state.pos.y - origin.y
+						x: this.physicsBody.state.pos.x - this.origin.x,
+						y: this.physicsBody.state.pos.y - this.origin.y
 					});
 					vel = rotatePoint( // Velocity relative to the player
 						vel.x, vel.y,
@@ -451,14 +453,14 @@
 		}
 	};
 
-	Entity.Generic.prototype.makeJump = function(worldType, origin) {
+	Entity.Generic.prototype.makeJump = function(worldType) {
 		if (this.physicsBody) {
 
 			var vel = {x:0, y: 0};
 			if (worldType == "circular") {
 				var angleDistPos = toAngleDist({
-					x: this.physicsBody.state.pos.x - origin.x,
-					y: this.physicsBody.state.pos.y - origin.y
+					x: this.physicsBody.state.pos.x - this.origin.x,
+					y: this.physicsBody.state.pos.y - this.origin.y
 				});
 				vel = rotatePoint(
 					this.physicsBody.state.vel.x, this.physicsBody.state.vel.y,
@@ -490,29 +492,29 @@
 
 	Entity.Generic.prototype.checkLimits = function(limits) {
 		var pos = this.getPos();
-		if (pos.x < this.limits[0] || pos.x > this.limits[1]) {
+		if (limits && pos.x < limits[0] || pos.x > limits[1]) {
 			this.setPos({
-				x: Math.min(Math.max(e.physicsBody.state.pos.x, this.limits[0]), this.limits[1]),
+				x: Math.min(Math.max(this.physicsBody.state.pos.x, limits[0]), limits[1]),
 				y: pos.y
 			});
 			if (this.physicsBody) this.physicsBody.state.vel.x = 0;
 		}
 	};
 
-	Entity.Generic.prototype.preventRotation = function(worldType) {
+	Entity.Generic.prototype.preventRotation = function(worldType, origin) {
 		if (worldType == "circular") {
 			var pos = this.getPos();
 			var angle = this.getAngle();
 			var targetAngle = Math.mod(toAngleDist({
-				x: pos.x,
-				y: pos.y
+				x: pos.x - this.origin.x,
+				y: pos.y - this.origin.y
 			})["angle"] + Math.PI / 2, Math.PI * 2);
 			var currentAngle = Math.mod(angle, 2 * Math.PI);
 			var toTarget = targetAngle - currentAngle;
 			this.setAngle(angle + toTarget);
 			if (this.physicsBody) this.physicsBody.state.angular.vel = 0;
 		}
-		else if (this.type == "flat") {
+		else if (worldType == "flat") {
 			this.setAngle(0);
 			if (this.physicsBody) this.physicsBody.state.angular.vel = 0;
 		}

@@ -9,11 +9,14 @@ Possibilité de choisir son skin (Dépend du gamemode, faire les comptes avant ?)
 Contraintes de distance (et d'autres trucs en rapport avec les physiques)
 Compte
 Player.addEntity => Broadcast du world entier, n'en faire qu'une partie
+Supprimer un monde si aucun joueur n'est dedans
+Warp d'un monde à l'autre / Events sur une zone
 
 CHECK Entités non physiques, décoration
 CHECK Gamemode
 
 CHECK Planètes
+
 
 
 
@@ -25,7 +28,7 @@ Client :
 Menu pause avec options de performance
 CHECK Chargement ?
 Message connexion au serveur en cours
-Fuite de mémoire au bout de plusieurs chargements de monde
+CHECK Fuite de mémoire au bout de plusieurs chargements de monde
 
 
 
