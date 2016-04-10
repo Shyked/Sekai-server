@@ -1,0 +1,10 @@
+{
+	"type": "Circle",
+	"radius": 52,
+	"texture": "neko2",
+	"textureOffset": {"x": 8, "y": -23},
+	"textureScale": {"x": 0.3569, "y": 0.3569},
+	"options": {
+		"restitution": 0.5
+	}
+}

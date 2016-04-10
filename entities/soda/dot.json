@@ -1,0 +1,11 @@
+{
+	"type": "Circle",
+	"radius": 10,
+	"options": {
+		"treatment": "static"
+	},
+	"style": {
+		"linesize": 0,
+		"background": "0xd0d0d0"
+	}
+}
