@@ -1,0 +1,9 @@
+{
+	"type": "Circle",
+	"radius": 25,
+	"options": {
+		"restitution": 0.5
+	},
+	"texture": "lue",
+  "textureScale": {"x": 0.25, "y": 0.25}
+}
