@@ -1,7 +1,7 @@
 var Default = require('./Default');
 
 var Entity = require('../entity');
-var Loader = require("loader").Loader;
+var Loader = require("../loader").Loader;
 
 var Nova = function(world) {
 	Default.apply(this, Array.prototype.slice.call(arguments));

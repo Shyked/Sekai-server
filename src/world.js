@@ -6,9 +6,9 @@
 
 	// CommonJS module
 	if (typeof exports !== 'undefined') {
-	    Physics = require("physicsjs-full");
-	    Entity = require("entity").Entity;
-	    Loader = require("loader").Loader;
+	    Physics = require("./physicsjs-full");
+	    Entity = require("./entity").Entity;
+	    Loader = require("./loader").Loader;
 	    Gamemodes = require("./gamemodes");
 	}
 

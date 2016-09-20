@@ -3,7 +3,7 @@
 
 	// CommonJS module
 	if (typeof exports !== 'undefined') {
-	    Physics = require("physicsjs-full");
+	    Physics = require("./physicsjs-full");
 	}
 
 	// browser

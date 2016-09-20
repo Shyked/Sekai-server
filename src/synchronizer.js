@@ -1,10 +1,10 @@
 (function() {
 
 
-	var Worlds = require("world").Worlds;
-	var Clients = require("client").Clients;
-	var Player = require("player").Player;
-	var ChatboxMessage = require("chatboxMessage").ChatboxMessage;
+	var Worlds = require("./world").Worlds;
+	var Clients = require("./client").Clients;
+	var Player = require("./player").Player;
+	var ChatboxMessage = require("./chatboxMessage").ChatboxMessage;
 
 	var Synchronizer = function() {
 		this.startingWorldId = null;

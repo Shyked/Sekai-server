@@ -1,9 +1,9 @@
-require("requestanimationframe");
-require("modulo");
-var Clients = require("client").Clients;
-var Worlds = require("world").Worlds;
-var Synchronizer = require("synchronizer").Synchronizer;
-var Entity = require("entity").Entity;
+require("./src/requestanimationframe");
+require("./src/modulo");
+var Clients = require("./src/client").Clients;
+var Worlds = require("./src/world").Worlds;
+var Synchronizer = require("./src/synchronizer").Synchronizer;
+var Entity = require("./src/entity").Entity;
 
 
 var server = require('http').createServer();

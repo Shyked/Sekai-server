@@ -1,10 +1,10 @@
-var Worlds = require("world").Worlds;
-var Clients = require("client").Clients;
-var Loader = require("loader").Loader;
-var ChatboxMessage = require("chatboxMessage").ChatboxMessage;
+var Worlds = require("./world").Worlds;
+var Clients = require("./client").Clients;
+var Loader = require("./loader").Loader;
+var ChatboxMessage = require("./chatboxMessage").ChatboxMessage;
 var Gamemode = require("./gamemodes");
 
-var Database = require("database").Database;
+var Database = require("./database").Database;
 
 
 
