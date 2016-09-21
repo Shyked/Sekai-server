@@ -382,7 +382,15 @@ Player.prototype.chatboxMessage = function(content) {
 				}
 			}
 			else if (command[0] == "test") {
-				Database.test();
+				var player = this;
+				Database.getCount(function(count) {
+					var msg = new ChatboxMessage();
+					msg.setType(ChatboxMessage.type.SERVER);
+					msg.setMsg("DEBUG " + count);
+					msg.setColor({r: 200, g: 150, b: 240});
+					player.broadcastToWorld("chatboxMessage", JSON.stringify(msg));
+					player.client.emit("chatboxMessage", JSON.stringify(msg));
+				});
 			}
 		}
 		else {

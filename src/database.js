@@ -1,20 +1,30 @@
 var Database = function() {
 
-  // var sqlite3 = require('sqlite3');
-  // var db = new sqlite3.Database('./db/main.sqlite');
+  var sqlite3 = require('sqlite3');
+  this.db = new sqlite3.Database('./db/main.sqlite');
 
   // Check if table exists
   // db.run();
   /*db.each("SELECT * FROM users", function(err, row) {
     console.log("a");
   });
+  */
 
-  db.run("CREATE TABLE users (id INTEGER, name VARCHAR2)", function(err) {
-    console.log("b");
-  });*/
+  var db = this;
+  this.db.run("CREATE TABLE `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` VARCHAR2);", function(err) {
+    db.db.run("INSERT INTO users (name) VALUES ('Someone')");
+  });
 
   // this.checkForMigrations();
 
+};
+
+
+
+Database.prototype.getCount = function(callback) {
+  this.db.each("SELECT COUNT(id)as \"count\" FROM users", function(err, row) {
+    callback(row["count"]);
+  });
 };
 
 
