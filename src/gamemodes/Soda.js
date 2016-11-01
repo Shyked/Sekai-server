@@ -152,7 +152,7 @@ Soda.prototype.collision = function(entityA, entityB, data) {
 			entity.physicsBody.sleep(false);
 			entity.physicsBody.state.vel.x = vel.x;
 			entity.physicsBody.state.vel.y = vel.y;
-			this.broadcastToWorld("entity", JSON.stringify(entity.export()));
+			this.broadcastToWorld("entity", entity.export());
 		}
 	}
 };

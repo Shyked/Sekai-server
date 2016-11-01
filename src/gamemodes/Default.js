@@ -108,25 +108,27 @@ Default.prototype.keyUp = function(key, player) {
 
 
 Default.prototype.moveEntity = function(direction, entity, enable) {
-	enable = Boolean(enable);
-	direction = direction.toLowerCase();
+	if (entity && direction) {
+		enable = Boolean(enable);
+		direction = direction.toLowerCase();
 
-	entity.move.direction[direction] = enable;
+		entity.move.direction[direction] = enable;
 
-	var moving = false;
-	for (var id in entity.move.direction) {
-		if (entity.move.direction[id]) {
-			moving = true;
-			break;
+		var moving = false;
+		for (var id in entity.move.direction) {
+			if (entity.move.direction[id]) {
+				moving = true;
+				break;
+			}
 		}
-	}
-	if (moving) {
-		entity.move.speed = this.params.player.speed;
-		entity.move.acc = this.params.player.acc;
-	}
-	else {
-		entity.move.speed = 0;
-		entity.move.acc = 0;
+		if (moving) {
+			entity.move.speed = this.params.player.speed;
+			entity.move.acc = this.params.player.acc;
+		}
+		else {
+			entity.move.speed = 0;
+			entity.move.acc = 0;
+		}
 	}
 };
 
@@ -162,7 +164,7 @@ Default.prototype.collision = function(entityA, entityB, data) {
 			entity.physicsBody.sleep(false);
 			entity.physicsBody.state.vel.x = vel.x;
 			entity.physicsBody.state.vel.y = vel.y;
-			this.broadcastToWorld("entity", JSON.stringify(entity.export()));
+			this.broadcastToWorld("entity", entity.export());
 		}
 	}
 };

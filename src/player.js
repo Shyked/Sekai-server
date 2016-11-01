@@ -4,25 +4,12 @@ var Loader = require("./loader").Loader;
 var ChatboxMessage = require("./chatboxMessage").ChatboxMessage;
 var Gamemode = require("./gamemodes");
 
-var Database = require("./database").Database;
+var Redis = require("./redis").Redis;
+var Users = require("./user").Users;
 
 
 
 var UPDATE_INTERVAL = 100;
-
-var PLAYER_SPRITES = [
-	"neko_eiji"
-	/*"neko",
-	"neko_big",
-	"neko_eiji"
-	"car_test",
-	"little",
-	"bloc",
-	"player",
-	"wisp",
-	"onclick",
-	"mini_cube"*/
-];
 
 
 
@@ -30,6 +17,9 @@ var Player = function(client, synchronizer) {
 
 	this.world = null;
 	this.entity = null;
+
+	this.user = null;
+	this.tokne = null;
 
 	this.client = client;
 	this.synchronizer = synchronizer;
@@ -65,7 +55,6 @@ var Player = function(client, synchronizer) {
 	this.clientWorldOk = false;
 
 
-	this.onNicknameOk = null;
 	this.client.emit('askNickname',"");
 
 };
@@ -76,16 +65,26 @@ var Player = function(client, synchronizer) {
   PLAYER
 ****************************/
 
+Player.prototype.init = function(askedWorld) {
+	this.goToWorld(askedWorld || this.synchronizer.startingWorldId);
+	var msgWelcome = new ChatboxMessage();
+	msgWelcome.setType(ChatboxMessage.type.SERVER);
+	msgWelcome.setMsg("Welcome in Sekai, " + this.getNickname() + "!");
+	msgWelcome.setStyle(ChatboxMessage.style.WELCOME);
+	this.client.emit('chatboxMessage', msgWelcome);
+};
+
+
 Player.prototype.clear = function() {
 	if (this.entity && this.world) {
-		this.broadcastToWorld('leave', JSON.stringify({
+		this.broadcastToWorld('leave', {
 			"id": this.client.id
-		}));
+		});
 		var msgLeave = new ChatboxMessage();
 		msgLeave.setType(ChatboxMessage.type.SERVER);
-		msgLeave.setMsg(":world: :right: " + this.nickname + " left this world");
+		msgLeave.setMsg(":world: :right: " + this.getNickname() + " left this world");
 		msgLeave.setStyle(ChatboxMessage.style.LEAVE);
-		this.broadcastToWorld('chatboxMessage', JSON.stringify(msgLeave));
+		this.broadcastToWorld('chatboxMessage', msgLeave);
 	}
 	if (this.entity) {
 		if (this.world && this.entity === this.world.entities[this.entity.id]) this.removeEntity(this.world, this.entity.id);
@@ -126,14 +125,14 @@ Player.prototype.goToWorld = function(worldId) {
 			player.clearEntityDistance(entityId);
 		});
 
-		var entityJSON = Loader.loadEntitySync(this.world.gamemode.getPlayerEntity(this), this.world.id);
-		if (entityJSON instanceof Array) throw "Can't bind multiple entities to a player";
-		entityJSON.x = this.world.spawn.x + Math.random() - 0.5;
-		entityJSON.y = this.world.spawn.y + Math.random() - 0.5;
-		if (!entityJSON.state) entityJSON.state = {};
-		if (!entityJSON.state.angular) entityJSON.state.angular = {};
-		entityJSON.state.angular.pos = (this.world.spawn.angle) ? this.world.spawn.angle : 0;
-		this.entity = this.addEntity(this.world, entityJSON);
+		var entityHash = Loader.loadEntitySync(this.world.gamemode.getPlayerEntity(this), this.world.id);
+		if (entityHash instanceof Array) throw "Can't bind multiple entities to a player";
+		entityHash.x = this.world.spawn.x + Math.random() - 0.5;
+		entityHash.y = this.world.spawn.y + Math.random() - 0.5;
+		if (!entityHash.state) entityHash.state = {};
+		if (!entityHash.state.angular) entityHash.state.angular = {};
+		entityHash.state.angular.pos = (this.world.spawn.angle) ? this.world.spawn.angle : 0;
+		this.entity = this.addEntity(this.world, entityHash);
 		this.entity.player = true;
 
 		this.world.gamemode.onPlayerJoin(this);
@@ -144,27 +143,27 @@ Player.prototype.goToWorld = function(worldId) {
 			client = Clients.get(this.world.clientsId[id]);
 			players[client.id] = {
 				"id": client.id,
-				"nickname": client.data.player.nickname,
+				"nickname": client.data.player.getNickname(),
 				"entityId": client.data.player.entity.id
 			};
 		}
 
-		this.client.emit('defineWorld', JSON.stringify({
+		this.client.emit('defineWorld', {
 			"players": players,
 			"world": this.world.export()
-		}));
+		});
 
-		this.broadcastToWorld('join', JSON.stringify({
+		this.broadcastToWorld('join', {
 			"id": this.client.id,
-			"nickname": this.nickname,
+			"nickname": this.getNickname(),
 			"entityId": this.entity.id
-		}));
+		});
 
 		var msgJoin = new ChatboxMessage();
 		msgJoin.setType(ChatboxMessage.type.SERVER);
-		msgJoin.setMsg(":world: :left: " + this.nickname + " joined this world");
+		msgJoin.setMsg(":world: :left: " + this.getNickname() + " joined this world");
 		msgJoin.setStyle(ChatboxMessage.style.JOIN);
-		this.broadcastToWorld('chatboxMessage', JSON.stringify(msgJoin));
+		this.broadcastToWorld('chatboxMessage', msgJoin);
 	}
 	else this.world = null;
 };
@@ -190,14 +189,14 @@ Player.prototype.broadcastToWorld = function(type, content, self) {
 
 Player.prototype.addEntity = function(world, properties) {
 	var entity = world.addEntity(properties);
-	//Clients.broadcast('entity', JSON.stringify(entity.export()));
-	this.broadcastToWorld('world', JSON.stringify(world.export()));
+	//Clients.broadcast('entity', entity.export());
+	this.broadcastToWorld('world', world.export());
 	return entity;
 };
 
 Player.prototype.removeEntity = function(world, entityId) {
 	this.world.removeEntity(entityId);
-	this.broadcastToWorld('removeEntity', JSON.stringify(entityId));
+	this.broadcastToWorld('removeEntity', entityId);
 };
 
 
@@ -209,7 +208,11 @@ Player.prototype.removeEntity = function(world, entityId) {
 
 Player.prototype.initMessagesHandler = function() {
 	var player = this;
-	this.client.addSocketEvent('nickname', function(client, content) {player.setNickname(content);});
+	this.client.addSocketEvent('nickname', function(client, content) {player.defineNickname(content);});
+	this.client.addSocketEvent('signup', function(client, content) {player.signUp(content);});
+	this.client.addSocketEvent('login', function(client, content) {player.logIn(content);});
+	this.client.addSocketEvent('token', function(client, content) {player.fromToken(content);});
+	this.client.addSocketEvent('start', function(client, content) {player.start(content);});
 	this.client.addSocketEvent('mousedown', function(client, content) {player.mouseDown(content);});
 	this.client.addSocketEvent('keydown', function(client, content) {player.keyDown(content);});
 	this.client.addSocketEvent('keyup', function(client, content) {player.keyUp(content);});
@@ -220,33 +223,133 @@ Player.prototype.initMessagesHandler = function() {
 	this.client.addSocketEvent('changeKeys', function(client, content) {player.changeKeys(content);});
 }
 
-Player.prototype.setNickname = function(content) {
-	var parse = JSON.parse(content);
-	var nickname = parse.nickname;
-	var askedWorld = ((parse.world) ? parse.world.toLowerCase() : null);
-	if (typeof nickname !== "string") {
-		this.client.emit('askNickname',"NOT_A_STRING");
+Player.prototype.defineNickname = function(content) {
+	var nickname = content.nickname;
+	var player = this;
+	if (!this.setNickname(nickname)) {
+		this.client.emit('askNickname',{
+			error: "REGEX_TEST_FAIL"
+		});
 	}
-	else if (nickname.length === 0) this.client.emit('askNickname',"TOO_SHORT");
 	else {
-		if (nickname.length > 25) nickname = nickname.substr(0,25);
-		this.nickname = nickname;
-		if (this.onNicknameOk) this.onNicknameOk(askedWorld);
+		Users.exists(this.getNickname(), function(exists) {
+			player.user = null;
+			if (exists) player.client.emit('askLogIn', {
+				nickname: player.getNickname()
+			});
+			else player.client.emit('askSignUp', {
+				nickname: player.getNickname()
+			});
+		});
 	}
+};
+
+Player.prototype.signUp = function(content) {
+	var token = content.token;
+	var nickname = content.nickname;
+	var email = content.email;
+	var hashed_password = content.hashed_password;
+	var askedWorld = content.askedWorld;
+	var player = this;
+	if (!this.setNickname(nickname)) {
+		this.client.emit('askSignUp',{
+			error: "REGEX_TEST_FAIL"
+		});
+	}
+	else {
+		Users.exists(this.getNickname(), function(exists) {
+			if (exists) player.client.emit('askSignUp', {
+				error: "ALREADY_EXISTS"
+			});
+			else Users.signUp(player.getNickname(), email, hashed_password, token, function(user, token) {
+				if (user) {
+					player.user = user;
+					player.client.emit('token', {
+						token: token
+					});
+					player.start({
+						askedWorld: askedWorld
+					});
+				}
+				else {
+					player.client.emit('askSignUp', {
+						error: "ALREADY_EXISTS"
+					});
+				}
+			});
+		});
+	}
+};
+
+Player.prototype.logIn = function(content) {
+	var token = content.token;
+	var nickname = content.nickname;
+	var hashedString = content.hashedString;
+	var askedWorld = content.askedWorld;
+	var player = this;
+	Users.logIn(token, nickname, hashedString, this.client.socket.id, function(user, token) {
+		if (user) {
+			player.user = user;
+			player.client.emit('token', {
+				token: token
+			});
+			player.start({
+				"askedWorld": askedWorld
+			});
+		}
+		else {
+			player.client.emit('askLogIn', {
+				error: "WRONG_PASSWORD"
+			});
+		}
+	})
+};
+
+Player.prototype.fromToken = function(content) {
+	var askedWorld = content.askedWorld;
+	var player = this;
+	Users.getFromToken(content.token, function(user, connected) {
+		if (user) {
+			player.user = user;
+			player.client.emit('askBack', {
+				nickname: player.getNickname(),
+				connected: connected
+			});
+		}
+		else player.client.emit('askNickname', {
+			error: "UNKNOWN_TOKEN"
+		});
+	});
+};
+
+Player.prototype.start = function(content) {
+	var askedWorld = ((content.askedWorld) ? content.world.toLowerCase() : null);
+	var token = content.token;
+	var player = this;
+	if (!this.user) {
+		Users.createGuest(token, this.getNickname(), function(user, token) {
+			player.user = user;
+			player.client.emit('token', {
+				token: token
+			});
+			player.init(askedWorld);
+		});
+	}
+	else this.init(askedWorld);
 };
 
 Player.prototype.mouseDown = function(content) {
 	if (this.world) {
-		var mousePosition = JSON.parse(content);
-		var entityJSON = Loader.loadEntitySync(/*"onclick"*/"car_test");
-		entityJSON.x = mousePosition.x;
-		entityJSON.y = mousePosition.y;
-		//this.addEntity(world, entityJSON);
+		var mousePosition = content;
+		var entityHash = Loader.loadEntitySync(/*"onclick"*/"car_test");
+		entityHash.x = mousePosition.x;
+		entityHash.y = mousePosition.y;
+		//this.addEntity(world, entityHash);
 	}
 };
 
 Player.prototype.keyDown = function(content) {
-	var data = JSON.parse(content);
+	var data = content;
 	var key = data.key;
 	var entity = data.entity;
 	/*if (keys[key] == "UP") this.jump(entity);
@@ -256,20 +359,20 @@ Player.prototype.keyDown = function(content) {
 		this.player(entity);
 		if (this.keys[key]) {
 			this.world.playerActionStart(this.keys[key], this);
-			this.broadcastToWorld('entity', JSON.stringify(this.entity.export()));
+			this.broadcastToWorld('entity', this.entity.export());
 		}
 		else this.world.keyDown(key, this);
 
 		/*else if (key == "O") {
 			this.entity.physicsBody.state.pos.y = -2200;
 			this.entity.physicsBody.state.old.pos.y = -2200;
-			this.broadcastToWorld('entity', JSON.stringify(this.entity.export()));
+			this.broadcastToWorld('entity', this.entity.export());
 		}*/
 	}
 };
 
 Player.prototype.keyUp = function(content) {
-	var data = JSON.parse(content);
+	var data = content;
 	var key = data.key;
 	var entity = data.entity;
 	/*if (keys[key] == "UP") {}
@@ -279,7 +382,7 @@ Player.prototype.keyUp = function(content) {
 		this.player(entity);
 		if (this.keys[key]) {
 			this.world.playerActionStop(this.keys[key], this);
-			this.broadcastToWorld('entity', JSON.stringify(this.entity.export()));
+			this.broadcastToWorld('entity', this.entity.export());
 		}
 		else this.world.keyUp(key, this);
 	}
@@ -300,18 +403,18 @@ Player.prototype.restartWorld = function(content) {
 };
 
 Player.prototype.requests = function(content) {
-	var request = JSON.parse(content);
+	var request = content;
 	if (request == "definePlayer") {
 		if (this.entity) {
 			this.clientWorldOk = true;
-			this.client.emit('definePlayer', JSON.stringify({
+			this.client.emit('definePlayer', {
 				"entity": this.entity.export(),
 				"jumpPower": this.jumpPower,
 				"speed": this.speed
-			}));
+			});
 		}
 		else {
-			this.client.emit("error", JSON.stringify("The player entity does not exist yet."));
+			this.client.emit("error", "The player entity does not exist yet.");
 		}
 	}
 };
@@ -322,7 +425,7 @@ Player.prototype.player = function(content) {
 			var player;
 			var worldId;
 			if (typeof content == "string") {
-				var parse = JSON.parse(content);
+				var parse = content;
 				player = parse.player;
 				worldId = parse.worldId;
 			}
@@ -336,7 +439,7 @@ Player.prototype.player = function(content) {
 };
 
 Player.prototype.chatboxMessage = function(content) {
-	var message = JSON.parse(content);
+	var message = content;
 	if (typeof message == "string") {
 		if (message.substr(0,1) == "/") {
 			var command = message.substr(1).split(" ");
@@ -350,17 +453,18 @@ Player.prototype.chatboxMessage = function(content) {
 					msgWorldChange.setMsg("Going to world " + command[1]);
 					msgWorldChange.setColor(ChatboxMessage.color.SUCCESS);
 					msgWorldChange.setNickname("World");
-					this.client.emit('chatboxMessage', JSON.stringify(msgWorldChange));
+					this.client.emit('chatboxMessage', msgWorldChange);
 					this.goToWorld(command[1]);
 				}
 				catch (e) {
 					console.log(e.message);
+					// console.log(e.stack);
 					var msgWorldChange = new ChatboxMessage();
 					msgWorldChange.setType(ChatboxMessage.type.OBJECT);
 					msgWorldChange.setMsg("Can't find world " + command[1]);
 					msgWorldChange.setColor(ChatboxMessage.color.ERROR);
 					msgWorldChange.setNickname("World");
-					this.client.emit('chatboxMessage', JSON.stringify(msgWorldChange));
+					this.client.emit('chatboxMessage', msgWorldChange);
 				}
 			}
 			else if (command[0] == "add") {
@@ -373,24 +477,29 @@ Player.prototype.chatboxMessage = function(content) {
 						"pelotte_pink",
 						"pelotte_red"
 					];
-					var entityJSON = Loader.loadEntitySync(pelottes[Math.floor(Math.random()*pelottes.length)]);
-					entityJSON.x = this.world.spawn.x + Math.random() - 0.5;
-					entityJSON.y = this.world.spawn.y + Math.random() - 0.5;
-					if (!entityJSON.options) entityJSON.options = {};
-					entityJSON.options.angle = (this.world.spawn.angle) ? this.world.spawn.angle : 0;
-					this.addEntity(this.world, entityJSON);
+					var entityHash = Loader.loadEntitySync(pelottes[Math.floor(Math.random()*pelottes.length)]);
+					entityHash.x = this.world.spawn.x + Math.random() - 0.5;
+					entityHash.y = this.world.spawn.y + Math.random() - 0.5;
+					if (!entityHash.options) entityHash.options = {};
+					entityHash.options.angle = (this.world.spawn.angle) ? this.world.spawn.angle : 0;
+					this.addEntity(this.world, entityHash);
 				}
 			}
 			else if (command[0] == "test") {
 				var player = this;
-				Database.getCount(function(count) {
-					var msg = new ChatboxMessage();
-					msg.setType(ChatboxMessage.type.SERVER);
-					msg.setMsg("DEBUG " + count);
-					msg.setColor({r: 200, g: 150, b: 240});
-					player.broadcastToWorld("chatboxMessage", JSON.stringify(msg));
-					player.client.emit("chatboxMessage", JSON.stringify(msg));
-				});
+				if (command[1] && command[1].toLowerCase() == "set") Redis.client.set("string key", command[2], function() {});
+				else {
+					Redis.client.get("string key", function(err, val) {
+						console.log(err);
+						console.log(val);
+						var msg = new ChatboxMessage();
+						msg.setType(ChatboxMessage.type.SERVER);
+						msg.setMsg("DEBUG " + val);
+						msg.setColor({r: 200, g: 150, b: 240});
+						player.broadcastToWorld("chatboxMessage", msg);
+						player.client.emit("chatboxMessage", msg);
+					});
+				}
 			}
 		}
 		else {
@@ -398,15 +507,15 @@ Player.prototype.chatboxMessage = function(content) {
 			msg.setType(ChatboxMessage.type.USER);
 			msg.setMsg(message);
 			msg.setColor({r: 60, g: 150, b: 255});
-			msg.setNickname(this.nickname);
-			this.broadcastToWorld("chatboxMessage", JSON.stringify(msg));
-			this.client.emit("chatboxMessage", JSON.stringify(msg));
+			msg.setNickname(this.getNickname());
+			this.broadcastToWorld("chatboxMessage", msg);
+			this.client.emit("chatboxMessage", msg);
 		}
 	}
 };
 
 Player.prototype.changeKeys = function(content) {
-	this.keys = JSON.parse(content);
+	this.keys = content;
 };
 
 
@@ -578,16 +687,31 @@ Player.prototype.worldUpdateInterval = function(range) {
 
 		delete entities[this.entity.id];
 
-		this.client.emit('world', JSON.stringify({
+		this.client.emit('world', {
 			"id": this.world.id,
 			"entities": entities
-		}));
+		});
 
 	}
 
 };
 
 
+
+
+Player.prototype.setNickname = function(nickname) {
+	if (/^[\w \-']+$/.test(nickname)) {
+		nickname = nickname.substr(0, 25);
+		if (this.user) this.user.nickname = nickname;
+		this.nickname = nickname;
+		return this.nickname;
+	}
+	else return false;
+};
+
+Player.prototype.getNickname = function() {
+	return (this.user) ? this.user.nickname : this.nickname;
+};
 
 
 
