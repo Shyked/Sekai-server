@@ -89,14 +89,14 @@ Nova.prototype.initEntities = function(player) {
 		}
 	}
 	this.initialized = true;
-	player.broadcastToWorld('world', JSON.stringify(this.world.export()), true);
+	player.broadcastToWorld('world', this.world.export(), true);
 };
 
 
 
 
 Nova.prototype.getPlayerEntity = function(player) {
-	if (player.nickname.toLowerCase() == "nova") return "nova";
+	if (player.getNickname().toLowerCase() == "nova") return "nova";
 	else return "cerise";
 };
 
@@ -119,7 +119,7 @@ Nova.prototype.playerActionStart = function(action, player) {
 
 
 Nova.prototype.screamEntity = function(player, little) {
-	if (player.nickname.toLowerCase() == "nova") {
+	if (player.getNickname().toLowerCase() == "nova") {
 
 		var gm = this;
 		var entity = player.entity;
@@ -151,7 +151,7 @@ Nova.prototype.screamEntity = function(player, little) {
 							e.physicsBody.state.vel.x = e.physicsBody.state.vel.x + delta.x;
 							e.physicsBody.state.vel.y = e.physicsBody.state.vel.y + delta.y;
 							
-							player.broadcastToWorld("entity", JSON.stringify(e.export()), true);
+							player.broadcastToWorld("entity", e.export(), true);
 						}
 					}
 				}
@@ -159,9 +159,9 @@ Nova.prototype.screamEntity = function(player, little) {
 
 
 			if (little) {
-				player.broadcastToWorld("audio", JSON.stringify("littleScream" + Math.floor(Math.random()*5+1)), true);
+				player.broadcastToWorld("audio", "littleScream" + Math.floor(Math.random()*5+1), true);
 			}
-			else player.broadcastToWorld("audio", JSON.stringify("scream"), true);
+			else player.broadcastToWorld("audio", "scream", true);
 			if (little) {
 				setTimeout(function() { computeScream(gm.littleScream); }, 50);
 			}
