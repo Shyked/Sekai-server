@@ -122,7 +122,7 @@
 		var aDecompVertices = decomp.quickDecomp(aVertices);
 		var decompVertices = [];
 		aDecompVertices.forEach((aPolygonVertices) => {
-			let polygonVertices = [];
+			var polygonVertices = [];
 			aPolygonVertices.forEach((aPolygonVerticesCoord) => {
 				polygonVertices.push({
 					x: aPolygonVerticesCoord[0],
