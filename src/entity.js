@@ -52,7 +52,7 @@
 			rotation = p.rotation,
 			gamemode = p.gamemode;
 
-		this.id = id;
+		this.id = parseInt(id);
 
 		this.smoothTeleport = {
 			angleDelta: null,
@@ -162,30 +162,35 @@
 			y = p.y,
 			vertices = p.vertices,
 			state = p.state,
+			parent = p.parent,
 			options = p.options || {};
-
 
 		this.type = 'Polygon';
 
-		options.x = x;
-		options.y = y;
+		options.x = x || 0;
+		options.y = y || 0;
 		options.vertices = vertices;
 		if (options.angle) {
 			var angle = options.angle;
 			options.angle = undefined;
 		}
 
+		if (parent) {
+			var com = centerOfMass2(vertices);
+			options.x += com.x;
+			options.y += com.y;
+		}
+
 		this.physicsBody = Physics.body('convex-polygon', options);
 		this.physicsBody.entity = this;
+
+		if (angle) this.physicsBody.state.angular.pos = angle;
 
 		var aabb = this.physicsBody.aabb();
 		this.textureCenter = {
 			x: aabb.x - this.physicsBody.state.pos.x,
 			y: aabb.y - this.physicsBody.state.pos.y,
 		};
-
-		if (angle) this.physicsBody.state.angular.pos = angle;
-
 
 		if (state) Entity.copyState(state, this.physicsBody.state);
 
@@ -210,10 +215,23 @@
 		options.y = y;
 		options.children = [];
 
+		// Distribute mass
+		if (options.mass) {
+			var childrenMass = 0;
+			for (var i in children) {
+				if (!children[i].options) children[i].options = {};
+				childrenMass += children[i].options.mass || 1;
+			}
+			for (var i in children) {
+				children[i].options.mass = (children[i].options.mass || 1) * (options.mass / childrenMass);
+			}
+		}
+
 		this.children = {};
 		this.childrenCount = 0;
 		var child;
 		for (var i in children) {
+			children[i].parent = this;
 			child = Entity.new(children[i]);
 
 			child.id = this.childrenCount;
@@ -233,12 +251,8 @@
 		};
 
 		if (state) Entity.copyState(state, this.physicsBody.state);
-		
-		this.com = Physics.body.getCOM(this.physicsBody.children);
-		this.com = {
-			x: this.com.x,
-			y: this.com.y
-		};
+
+		this.refreshCom();
 	};
 
 
@@ -279,7 +293,7 @@
 			return {
 				"x": this.physicsBody.state.pos.x,
 				"y": this.physicsBody.state.pos.y
-			};			
+			};
 		}
 		else {
 			if (this.type) {
@@ -290,6 +304,16 @@
 			}
 			else return {x: 0, y: 0};
 		}
+	};
+
+	Entity.Generic.prototype.getVel = function() {
+		if (this.physicsBody) {
+			return {
+				"x": this.physicsBody.state.vel.x,
+				"y": this.physicsBody.state.vel.y
+			};
+		}
+		else return {x: 0, y: 0};
 	};
 
 	Entity.Generic.prototype.getAngle = function() {
@@ -309,16 +333,28 @@
 		if (this.physicsBody) {
 			var dx = pos.x - this.physicsBody.state.pos.x;
 			var dy = pos.y - this.physicsBody.state.pos.y;
-			this.physicsBody.state.pos.x += dx;
-			this.physicsBody.state.pos.y += dy;
-			this.physicsBody.state.old.pos.x += dx;
-			this.physicsBody.state.old.pos.y += dy;
+			this.physicsBody.state.pos.x = this.physicsBody.state.pos.x + dx;
+			this.physicsBody.state.pos.y = this.physicsBody.state.pos.y + dy;
+			this.physicsBody.state.old.pos.x = this.physicsBody.state.old.pos.x + dx;
+			this.physicsBody.state.old.pos.y = this.physicsBody.state.old.pos.x + dy;
 		}
 		else {
 			if (this.type) {
 				this.x = pos.x;
 				this.y = pos.y;
 			}
+		}
+	};
+
+	Entity.Generic.prototype.setVel = function(vel) {
+		if (this.physicsBody) {
+			var currentVel = this.getVel();
+			var dx = vel.x - currentVel.x;
+			var dy = vel.y - currentVel.y;
+			this.physicsBody.state.vel.x += dx;
+			this.physicsBody.state.vel.y += dy;
+			this.physicsBody.state.old.vel.x += dx;
+			this.physicsBody.state.old.vel.y += dy;
 		}
 	};
 
@@ -332,6 +368,20 @@
 			if (this.type) {
 				this.angle = angle;
 			}
+		}
+	};
+
+
+
+	/* SLEEP */
+
+	Entity.Generic.prototype.sleep = function(sleep) {
+		if (this.physicsBody) {
+			if (typeof sleep != 'undefined') return this.physicsBody.sleep(sleep);
+			else return this.physicsBody.sleep();
+		}
+		else {
+			return true;
 		}
 	};
 
@@ -375,8 +425,8 @@
 
 	/* DISPLACEMENTS */
 
-	Entity.Generic.prototype.applyDisplacements = function(worldType, maxSpeedLimiter, limits, dec) {
-		this.deceleration(dec);
+	Entity.Generic.prototype.applyDisplacements = function(worldType, maxSpeedLimiter, limits, dec, speedLimit) {
+		this.deceleration(dec, speedLimit);
 		if (this.move.speed) this.makeMove(worldType, maxSpeedLimiter);
 		if (this.jump) this.makeJump(worldType);
 		if (this.player && limits) this.checkLimits(limits);
@@ -384,11 +434,19 @@
 	};
 
 
-	Entity.Generic.prototype.deceleration = function(dec) {
+	Entity.Generic.prototype.deceleration = function(dec, speedLimit) {
 		if (this.physicsBody) {
 			this.physicsBody.state.vel.x = this.physicsBody.state.vel.x / (1 + dec);
 			this.physicsBody.state.vel.y = this.physicsBody.state.vel.y / (1 + dec);
 			this.physicsBody.state.angular.vel = this.physicsBody.state.angular.vel / (1 + dec);
+			if (this.player) {
+				var vel = this.getVel();
+				angleDistVel = toAngleDist(vel);
+				if (angleDistVel.dist > speedLimit) {
+					angleDistVel.dist = speedLimit;
+					this.setVel(toXY(angleDistVel));
+				}
+			}
 		}
 	};
 
@@ -546,11 +604,11 @@
 			Entity.copyState(this.physicsBody.state, entityJSON.state, true);
 			entityJSON.options = {};
 			Entity.copyOptions(this.physicsBody, entityJSON.options, true);
-			entityJSON.sleep = this.physicsBody.sleep();
+			entityJSON.sleep = this.sleep();
 		}
 
 		for (var id in this) {
-			if (typeof id != 'function' && id != 'physicsBody' && id != 'smoothTeleport') entityJSON[id] = this[id];
+			if (typeof this[id] != 'function' && id != 'physicsBody' && id != 'smoothTeleport') entityJSON[id] = this[id];
 		}
 		var pos = this.getPos();
 		var angle = this.getAngle();
@@ -619,16 +677,17 @@
 
 	Entity.Compound.prototype.refreshCom = function() {
 		this.physicsBody.refreshGeometry();
+		this.physicsBody.recalc();
 		this.com = Physics.body.getCOM(this.physicsBody.children);
 		this.com = {
 			x: this.com.x,
 			y: this.com.y
-		};
+		};/*
 		var aabb = this.physicsBody.aabb();
 		this.textureCenter = {
 			x: aabb.x - this.physicsBody.state.pos.x,
 			y: aabb.y - this.physicsBody.state.pos.y
-		};
+		};*/
 	};
 
 	Entity.Compound.prototype.export = function() {
@@ -689,6 +748,8 @@
 
 		if (entityJSON.state) Entity.copyState(entityJSON.state, entity.physicsBody.state);
 		if (entityJSON.options) Entity.copyOptions(entityJSON.options, entity.physicsBody);
+
+		this.physicsBody.recalc();
 	}
 
 
@@ -749,6 +810,7 @@
 		from.asleep && (to.asleep = from.asleep);
 		from.sleepIdleTime && (to.sleepIdleTime = from.sleepIdleTime);
 		from.cof && (to.cof = from.cof);
+		from.mass && (to.mass = from.mass);
 	};
 
 
@@ -812,6 +874,45 @@
 		point.x += centerX;
 		point.y += centerY;
 		return point;
+	}
+
+	function centerOfMass(vertices) {
+		var total = {
+			mass: 0,
+			x: 0,
+			y: 0
+		};
+		for (var id in vertices) {
+			total.mass += 1;
+			total.x += vertices[id].x;
+			total.y += vertices[id].y;
+		}
+		return {
+			x: total.x / total.mass,
+			y: total.y / total.mass
+		};
+	}
+
+	function centerOfMass2(v) {
+		var area = 0;
+		var com = { x: 0, y: 0 };
+		for (var i in v) {
+			i = parseInt(i);
+			var secondFactor = v[i].x * v[(i + 1) % v.length].y
+												 -
+												 v[(i + 1) % v.length].x * v[i].y;
+			area += secondFactor;
+			com.x += (v[i].x + v[(i + 1) % v.length].x)
+								*
+								secondFactor;
+			com.y += (v[i].y + v[(i + 1) % v.length].y)
+								*
+								secondFactor;
+		}
+		area /= 2;
+		com.x /= 6 * area;
+		com.y /= 6 * area;
+		return com;
 	}
 
 

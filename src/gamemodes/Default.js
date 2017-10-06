@@ -4,7 +4,8 @@ var Clients = require("../client").Clients;
 
 
 var PLAYER_SPRITES = [
-	"lue"
+	"lue",
+	"car_test"
 	/*"neko",
 	"neko_big",
 	"neko_eiji"
@@ -24,6 +25,7 @@ var Default = function(world) {
 			"acc": 0.07,
 			"jumpPower": 0.7,
 			"maxSpeedLimiter": "strict",
+			"speedLimit": 2,
 			"deceleration": 0.001,
 			"actions": {
 				"UP": "jump",

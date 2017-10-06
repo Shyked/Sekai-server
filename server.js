@@ -11,6 +11,8 @@ var server = require('http').createServer();
 Clients.attachServer(server);
 
 
+// Error.stackTraceLimit = Infinity;
+
 
 
 Synchronizer.setStartingWorldId("planets");
@@ -33,7 +35,7 @@ Synchronizer.ready(function() {
     // Console functions
 
     function prompt() {
-        in_.question(">", function(str) {
+        in_.question("> ", function(str) {
         	parseCommands(str);
             return prompt(); // Too lazy to learn async
         });	
@@ -53,6 +55,9 @@ Synchronizer.ready(function() {
     	    }
             else if (first == "log") {
                 console.log(Worlds.get("newton").entities);
+            }
+            else if (first == "debugger") {
+                debugger;
             }
     	}
     	catch (e) {

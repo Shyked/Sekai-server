@@ -3,6 +3,7 @@
 	"radius": 106,
 	"texture": "pomme",
 	"options": {
-		"restitution": 0.5
+		"restitution": 0.5,
+    "mass": 5
 	}
 }

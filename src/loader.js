@@ -1,16 +1,17 @@
 (function() {
 
 	var fs = require("fs");
+	var decomp = require("poly-decomp");
 
 
 	var Loader = function() {
-		this.loadedEntities = {};
+		this.entitiesCache = {};
 	};
 
-	Loader.prototype.loadWorldSync = function(worldName) {
+	Loader.prototype.loadWorldSync = function(worldName) { // Split in multiple functions!
 		var data = fs.readFileSync("worlds/" + worldName.toLowerCase() + ".json");
 		if (!data) {
-			console.log(err);
+			console.log("Failed while loading world");
 			return null;
 		}
 		else {
@@ -19,37 +20,17 @@
 			if (!worldJSON.entitiesCount) {
 
 				for (var idE in worldJSON.entities) {
-					if (worldJSON.entities[idE].LOAD) {
-						loadedEntities = singleLoader.loadEntitySync(worldJSON.entities[idE].LOAD, worldName);
-						if (!(loadedEntities instanceof Array)) loadedEntities = [loadedEntities];
+					var entityProperties = worldJSON.entities[idE];
+					if (entityProperties.LOAD) {
+						loadedEntities = singleLoader.loadEntityFileSync(entityProperties.LOAD, worldName);
 						for (var idLE in loadedEntities) {
-							if (worldJSON.entities[idE].angle) {
-								var pos = rotatePoint(
-									loadedEntities[idLE].x || 0, loadedEntities[idLE].y || 0,
-									worldJSON.entities[idE].angle,
-									0, 0
-								);
-								loadedEntities[idLE].x = pos.x;
-								loadedEntities[idLE].y = pos.y;
-							}
-							for (var idP in worldJSON.entities[idE]) {
-								if (idP == "x" || idP == "y") loadedEntities[idLE][idP] = (loadedEntities[idLE][idP] || 0) + (worldJSON.entities[idE][idP] || 0);
-								else if (idP == "options") {
-									if (!loadedEntities[idLE][idP]) loadedEntities[idLE][idP] = worldJSON.entities[idE];
-									else {
-										for (var idO in worldJSON.entities[idE][idP]) {
-											loadedEntities[idLE][idP][idO] = worldJSON.entities[idE][idP][idO];
-										}
-									}
-								}
-								else if (idP != "LOAD") loadedEntities[idLE][idP] = worldJSON.entities[idE][idP];
-							}
+							this.applyEntityProperties(entityProperties, loadedEntities[idLE]);
 							loadedEntities[idLE].id = worldJSON.entities.lenght;
 							worldJSON.entities.push(loadedEntities[idLE]);
 						}
 						delete worldJSON.entities[idE];
 					}
-					else worldJSON.entities[idE].id = idE;
+					else entityProperties.id = idE;
 
 				}
 
@@ -60,28 +41,97 @@
 		}
 	};
 
-	Loader.prototype.loadEntitySync = function(entityName, worldId) {
-		if (worldId) {
-			if (!this.loadedEntities[worldId + "/" + entityName]) {
-				try {
-					this.loadedEntities[worldId + "/" + entityName] = JSON.parse(fs.readFileSync("entities/" + worldId + "/" + entityName.toLowerCase() + ".json"));
-					return clone(this.loadedEntities[worldId + "/" + entityName]);
-				}
-				catch (e) { }
+	Loader.prototype.loadEntityFileSync = function(entityName, worldId) {
+		var loadedEntities = null;
+		if (worldId) { // Try to load world-specific entity
+			if (this.entitiesCache[worldId + "/" + entityName]) {
+				loadedEntities = clone(this.entitiesCache[worldId + "/" + entityName]);
 			}
 			else {
-				return clone(this.loadedEntities[worldId + "/" + entityName]);
+				try {
+					this.entitiesCache[worldId + "/" + entityName] = JSON.parse(fs.readFileSync("entities/" + worldId + "/" + entityName.toLowerCase() + ".json"));
+					loadedEntities = clone(this.entitiesCache[worldId + "/" + entityName]);
+				}
+				catch (e) { } // Isn't world-specific
 			}
 		}
-		try {
-			if (!this.loadedEntities["global/" + entityName]) {
-				this.loadedEntities["global/" + entityName] = JSON.parse(fs.readFileSync("entities/global/" + entityName.toLowerCase() + ".json"));
+		if (!loadedEntities) {
+			try {
+				if (!this.entitiesCache["global/" + entityName]) {
+					this.entitiesCache["global/" + entityName] = JSON.parse(fs.readFileSync("entities/global/" + entityName.toLowerCase() + ".json"));
+				}
+			}
+			catch (e) {
+				throw "Can't load entity " + entityName + " for the world " + worldId;
+			}
+			loadedEntities = clone(this.entitiesCache["global/" + entityName]);
+		}
+		if (!(loadedEntities instanceof Array)) loadedEntities = [loadedEntities];
+		for (var id in loadedEntities) {
+			if (loadedEntities[id].type == 'Concave') {
+				this.convertConcaveToCompound(loadedEntities[id]);
 			}
 		}
-		catch (e) {
-			throw "Couldn't load entity " + entityName + " for the world " + worldId;
+		return loadedEntities;
+	};
+
+	Loader.prototype.applyEntityProperties = function(entityProperties, loadedEntityProperties) {
+		if (entityProperties.angle) {
+			var pos = rotatePoint(
+				loadedEntityProperties.x || 0, loadedEntityProperties.y || 0,
+				entityProperties.angle,
+				0, 0
+			);
+			loadedEntityProperties.x = pos.x;
+			loadedEntityProperties.y = pos.y;
 		}
-		return clone(this.loadedEntities["global/" + entityName]);
+		for (var idP in entityProperties) { // For each properties
+			if (idP == "x" || idP == "y") loadedEntityProperties[idP] = (loadedEntityProperties[idP] || 0) + (entityProperties[idP] || 0);
+			else if (idP == "options") {
+				if (!loadedEntityProperties[idP]) loadedEntityProperties[idP] = entityProperties;
+				else {
+					for (var idO in entityProperties[idP]) { // For each options
+						loadedEntityProperties[idP][idO] = entityProperties[idP][idO];
+					}
+				}
+			}
+			else if (idP != "LOAD") loadedEntityProperties[idP] = entityProperties[idP];
+		}
+	};
+
+	Loader.prototype.convertConcaveToCompound = function(entityProperties) {
+		var decompVertices = this.decomp(entityProperties.vertices);
+		entityProperties.children = [];
+		decompVertices.forEach((polygonVertices) => {
+			entityProperties.children.push({
+				type: 'Polygon',
+				x: 0, // TODO
+				y: 0, // TODO
+				vertices: polygonVertices
+			});
+		});
+		entityProperties.type = 'Compound';
+	};
+
+	Loader.prototype.decomp = function(vertices) {
+		var aVertices = [];
+		for (var id in vertices) {
+			aVertices.push([vertices[id].x, vertices[id].y]);
+		}
+		decomp.makeCCW(aVertices);
+		var aDecompVertices = decomp.quickDecomp(aVertices);
+		var decompVertices = [];
+		aDecompVertices.forEach((aPolygonVertices) => {
+			let polygonVertices = [];
+			aPolygonVertices.forEach((aPolygonVerticesCoord) => {
+				polygonVertices.push({
+					x: aPolygonVerticesCoord[0],
+					y: aPolygonVerticesCoord[1]
+				});
+			});
+			decompVertices.push(polygonVertices);
+		});
+		return decompVertices;
 	};
 
 

@@ -79,7 +79,7 @@ Nova.prototype.onPlayerLeave = function(player) {
 Nova.prototype.initEntities = function(player) {
 	for (var idF in this.fruits) {
 		for (var i = 0 ; i < 2 ; i++) {
-			var entityJSON = Loader.loadEntitySync(this.fruits[idF], this.world.id);
+			var entityJSON = Loader.loadEntityFileSync(this.fruits[idF], this.world.id)[0];
 			entityJSON.x = Math.floor(Math.random() * 1200 - 600);
 			entityJSON.y = Math.floor(Math.random() * 1200 - 600);
 			if (!entityJSON.state) entityJSON.state = {};

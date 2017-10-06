@@ -133,6 +133,7 @@
 
 		this.initEvents([
 			"removeEntity",
+			"addEntity",
 			"afterStep",
 			"collision"
 		]);
@@ -192,7 +193,7 @@
 				var origin = this.planets[minDistId].pos;
 				this.entities[idE].origin = origin;
 			}
-			this.entities[idE].applyDisplacements(this.type, this.gamemode.params.player.maxSpeedLimiter, this.limits, this.gamemode.params.player.deceleration);
+			this.entities[idE].applyDisplacements(this.type, this.gamemode.params.player.maxSpeedLimiter, this.limits, this.gamemode.params.player.deceleration, this.gamemode.params.player.speedLimit);
 		}
 		this.triggerEvent("afterStep", null);
 		this.entitiesCheckpoint();
@@ -232,6 +233,7 @@
 			for (var idP in properties) {
 				entities.push(this.addEntity(properties[idP]));
 			}
+			this.triggerEvent('addEntity', entities);
 			return entities;
 		}
 		else {
@@ -240,6 +242,7 @@
 			var id = this.entitiesCount++;
 
 			properties.id = id;
+			if (!Entity[properties.type]) throw "Entity type \"" + properties.type + "\" is not a valid type.";
 			entity = new Entity[properties.type](properties);
 
 			if (addToWorld) {
@@ -251,6 +254,9 @@
 				}
 			}
 			this.entities[id] = entity;
+			var entitiesHash = {};
+			entitiesHash[entity.id] = entity;
+			this.triggerEvent('addEntity', entitiesHash);
 			return entity;
 		}
 	};
@@ -311,13 +317,14 @@
 						"treatment": "static",
 						"cof": 0.8,
 						"restitution": 1
-					}
+					},
+					"parent": "Compound"
 				}
 			}
 		};
 
 		var createCompound = function(children, texture, textureOffset, positions, offset) {
-			var entity = world.addEntity({
+			/*var entity = world.addEntity({
 				"type": "Compound",
 				"hiddenChildren": ((texture)?true:false),
 				"options": {
@@ -325,24 +332,35 @@
 					"cof": 0.8,
 					"restitution": 1
 				}
-			}, false);
-			if (texture) entity.texture = texture;
-			if (textureOffset) entity.textureOffset = textureOffset;
+			}, false);*/
+			var entityProperties = {
+				"type": "Compound",
+				"hiddenChildren": ((texture)?true:false),
+				"options": {
+					"treatment": "static",
+					"cof": 0.8,
+					"restitution": 1
+				}
+			};
+			if (texture) entityProperties.texture = texture;
+			if (textureOffset) entityProperties.textureOffset = textureOffset;
 
-			for (var idC in children) {
+			entityProperties.children = children;
+			/*for (var idC in children) {
 				var child = Entity.new(children[idC]);
 				entity.addChild(child);
 				var b = entity.children[idC].physicsBody;
 				b.state.pos.x = b.state.pos.x - (b.geometry.vertices[0].x - positions[idC].x);
 				b.state.pos.y = b.state.pos.y - (b.geometry.vertices[0].y - positions[idC].y);
-			}
-			world.physicsWorld.add(entity.physicsBody);
+			}*/
+			// world.physicsWorld.add(entity.physicsBody);
+			var entity = world.addEntity(entityProperties);
 
 			entity.refreshCom();
 			
 			entity.physicsBody.state.pos.x = entity.physicsBody.state.pos.x + entity.com.x + offset.x;
 			entity.physicsBody.state.pos.y = entity.physicsBody.state.pos.y + entity.com.y + offset.y;
-
+/*
 			for (var idC in entity.physicsBody.children) {
 				var child = entity.physicsBody.children[idC];
 				if (child.geometry.vertices) {
@@ -351,7 +369,7 @@
 				}
 			}
 
-			entity.refreshCom();
+			entity.refreshCom();*/
 		};
 
 
@@ -502,10 +520,13 @@
 			}
 			this.behaviors = worldJSON.behaviors;
 		}
+
+		if (!this.gamemode) this.gamemode = Gamemodes.get(worldJSON.gamemode, this);
+		if (worldJSON.limits) if (worldJSON.limits[0] < worldJSON.limits[1]) this.limits = worldJSON.limits;
 		if (worldJSON.spawn) this.spawn = worldJSON.spawn;
 		if (worldJSON.type) this.type = worldJSON.type;
-		if (!this.gamemode) this.gamemode = Gamemodes.get(worldJSON.gamemode, this);
-
+		if (worldJSON.planets) this.planets = worldJSON.planets;
+		if (worldJSON.background) this.background = worldJSON.background;
 
 		this.entitiesCount = worldJSON.entitiesCount || this.entitiesCount;
 
@@ -516,20 +537,6 @@
 				console.error(e);
 				throw e;
 			}
-		}
-
-
-		if (worldJSON.limits) {
-			if (worldJSON.limits[0] < worldJSON.limits[1]) this.limits = worldJSON.limits;
-		}
-
-		if (worldJSON.planets) {
-			this.planets = worldJSON.planets;
-		}
-
-
-		if (worldJSON.background) {
-			this.background = worldJSON.background;
 		}
 
 		this.updateEntities(worldJSON.entities);

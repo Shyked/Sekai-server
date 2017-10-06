@@ -1,0 +1,623 @@
+{
+  "type": "flat",
+  "behaviors": {
+    "gravity": {
+      "acc": {
+        "x": 0,
+        "y": 0.0017
+      }
+    }
+  },
+  "spawn": {
+    "x": 0,
+    "y": 0
+  },
+  "limits": [-3000, 3000],
+  "background": {
+    "image": "auto-flat",
+    "color": "0x05081b",
+    "depth": 0.3,
+    "divisionSize": 512
+  },
+  "ground": [
+    {
+      "x": 0,
+      "y": 0,
+      "depth": 100,
+      "parts": [
+        {
+          "texture": "",
+          "textureOffset": {"x": 0, "y": 0},
+          "elevation": [
+            [-3800, -3000],
+            [-3000, -3000],
+            [-2995, -2000],
+            [-2990, -1500],
+            [-2900, 0]
+          ]
+        },
+        {
+          "texture": "herbe",
+          "textureOffset": {"x": 0, "y": 0},
+          "elevation": [
+            [-2900, 0],
+            [-2800, 100],
+            [-2500, 300],
+            [-2000, 400],
+            [-1000, 500]
+          ]
+        },
+        {
+          "texture": "",
+          "textureOffset": {"x": 0, "y": 0},
+          "elevation": [
+            [-1000, 500],
+            [-900, 400],
+            [-850, 500],
+            [0, 600],
+            [1000, 600],
+            [1200, 500]
+          ]
+        },
+        {
+          "texture": "",
+          "textureOffset": {"x": 0, "y": 0},
+          "elevation": [
+            [1200, 500],
+            [2000, 300],
+            [2500, -100],
+            [2700, -200],
+            [2800, -300],
+            [2900, -500],
+            [3000, -3000],
+            [3800, -3000]
+          ]
+        }
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "LOAD": "concave",
+      "x": -500,
+      "y": -500,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type" : "Rectangle",
+      "x": 2600,
+      "y": -2800,
+      "width": 200,
+      "height": 30,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type" : "Rectangle",
+      "x": 2515,
+      "y": -2815,
+      "width": 30,
+      "height": 60,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type" : "Rectangle",
+      "x": 2685,
+      "y": -2815,
+      "width": 30,
+      "height": 60,
+      "options": {
+        "treatment": "static"
+      }
+    },
+
+    {
+      "type" : "Rectangle",
+      "x": 0,
+      "y": 200,
+      "width": 4000,
+      "height": 30,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "LOAD": "white",
+      "x": -500,
+      "y": 60,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "LOAD": "black",
+      "x": -650,
+      "y": 60,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 200,
+      "y": 0,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 230,
+      "y": 50,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 250,
+      "y": -100,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 280,
+      "y": 50,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 300,
+      "y": -150,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 340,
+      "y": 80,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": 50,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 200,
+      "y": 80,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Polygon",
+      "x": 1000,
+      "y": -100,
+      "options": {
+        "treatment": "static"
+      },
+      "texture": "polygon_test2",
+      "vertices": [
+        {"x": 0, "y": 0},
+        {"x": 200, "y": 0},
+        {"x": 200, "y": 300},
+        {"x": 0, "y": 200}
+      ]
+    },
+    {
+      "type": "Compound",
+      "x": 1500,
+      "y": -100,
+      "options": {
+        "treatment": "static"
+      },
+      "texture": "polygon_test2",
+      "children": [
+        {
+          "type": "Polygon",
+          "x": 0,
+          "y": 0,
+          "vertices": [
+            {"x": 0, "y": 0},
+            {"x": 100, "y": 0},
+            {"x": 100, "y": 250},
+            {"x": 0, "y": 200}
+          ]
+        },
+        {
+          "type": "Polygon",
+          "x": 0,
+          "y": 0,
+          "vertices": [
+            {"x": 100, "y": 0},
+            {"x": 200, "y": 0},
+            {"x": 200, "y": 300},
+            {"x": 100, "y": 250}
+          ]
+        }
+      ]
+    },
+    {
+      "LOAD": "deco",
+      "x": -900,
+      "y": 185,
+      "zIndex": -1
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -1000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -1500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -2000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -2500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -3000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -3500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -4000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -4500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -5000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -5500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -6000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -6500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -7000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -7500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -8000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -8500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -9000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -9500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -10000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -10500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -11000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -11500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -12000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -12500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -13000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -13500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -14000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -14500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -15000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -15500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -16000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -16500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -17000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -17500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -18000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -18500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -19000,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    },
+    {
+      "type": "Circle",
+      "x": 350,
+      "y": -19500,
+      "radius": 20,
+      "options": {
+        "treatment": "static"
+      }
+    }
+  ]
+}

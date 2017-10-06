@@ -207,6 +207,15 @@
 			}
 		},
 		{
+			"type": "Circle",
+			"x": 1000,
+			"y": -100,
+			"radius": 10,
+			"options": {
+				"treatment": "static"
+			}
+		},
+		{
 			"type": "Polygon",
 			"x": 1000,
 			"y": -100,
@@ -232,8 +241,6 @@
 			"children": [
 				{
 					"type": "Polygon",
-					"x": 50,
-					"y": -25,
 					"vertices": [
 						{"x": 0, "y": 0},
 						{"x": 100, "y": 0},
@@ -243,8 +250,6 @@
 				},
 				{
 					"type": "Polygon",
-					"x": 150,
-					"y": 0,
 					"vertices": [
 						{"x": 100, "y": 0},
 						{"x": 200, "y": 0},

@@ -13,7 +13,10 @@ var Clients = function() {
 Clients.prototype.attachServer = function(server) {
 	this.server = server;
 
-	var io = require('socket.io')(server);
+	var io = require('socket.io')(server, {
+		pingInterval: 5000,
+		pingTimeout: 10000
+	});
 	var Clients = this;
 	io.on('connection', function(socket){
 

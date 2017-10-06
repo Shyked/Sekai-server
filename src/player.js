@@ -19,7 +19,6 @@ var Player = function(client, synchronizer) {
 	this.entity = null;
 
 	this.user = null;
-	this.tokne = null;
 
 	this.client = client;
 	this.synchronizer = synchronizer;
@@ -33,6 +32,8 @@ var Player = function(client, synchronizer) {
 		"A": "ACTION2"
 	};
 
+	this.client.data.player = this;
+
 	var player = this;
 	this.client.addEventListener('delete', function() {
 		player.clear();
@@ -40,7 +41,8 @@ var Player = function(client, synchronizer) {
 
 	this.eventsIds = {
 		"world": {
-			"removeEntity": null
+			"removeEntity": [],
+			"addEntity": []
 		}
 	};
 
@@ -91,11 +93,16 @@ Player.prototype.clear = function() {
 		this.entity = null;
 	}
 	if (this.world) {
-		this.world.removeEventListener("removeEntity", this.eventsIds["world"]["removeEntity"]);
-		this.eventsIds["world"]["removeEntity"] = null;
+		for (var idE in this.eventsIds["world"]) {
+			while (this.eventsIds["world"][idE][0]) {
+				this.world.removeEventListener(idE, this.eventsIds["world"][idE][0]);
+				this.eventsIds["world"][idE].splice(0, 1);
+			}
+		}
 		this.world.clientsId.splice(this.world.clientsId.indexOf(this.client.id),1);
 		this.world.gamemode.onPlayerLeave(this);
 	}
+	this.client.clearInterval("worldUpdate");
 	this.world = null;
 };
 
@@ -121,11 +128,11 @@ Player.prototype.goToWorld = function(worldId) {
 		this.clientWorldOk = false;
 
 		var player = this;
-		this.eventsIds["world"]["removeEntity"] = this.world.addEventListener("removeEntity", function(entityId) {
+		this.eventsIds["world"]["removeEntity"].push(this.world.addEventListener("removeEntity", function(entityId) {
 			player.clearEntityDistance(entityId);
-		});
+		}));
 
-		var entityHash = Loader.loadEntitySync(this.world.gamemode.getPlayerEntity(this), this.world.id);
+		var entityHash = Loader.loadEntityFileSync(this.world.gamemode.getPlayerEntity(this), this.world.id)[0];
 		if (entityHash instanceof Array) throw "Can't bind multiple entities to a player";
 		entityHash.x = this.world.spawn.x + Math.random() - 0.5;
 		entityHash.y = this.world.spawn.y + Math.random() - 0.5;
@@ -174,6 +181,20 @@ Player.prototype.broadcastToWorld = function(type, content, self) {
 		for (var id in this.world.clientsId) {
 			client = Clients.get(this.world.clientsId[id]);
 			if (client != this.client || self) client.emit(type, content);
+		}
+	}
+};
+
+Player.prototype.broadcastEntity = function(entity, self) {
+	if (this.world) {
+		var client;
+		for (var id in this.world.clientsId) {
+			client = Clients.get(this.world.clientsId[id]);
+			if ((client != this.client || self) && client.data.player && client.data.player.entity) {
+				if (client.data.player.distFromEntity(entity) < client.data.player.intVars.thresholds.medium) {
+					client.emit('entity', entity.export());
+				}
+			}
 		}
 	}
 };
@@ -305,7 +326,7 @@ Player.prototype.logIn = function(content) {
 	})
 };
 
-Player.prototype.fromToken = function(content) {
+Player.prototype.fromToken = function(content, callback) {
 	var askedWorld = content.askedWorld;
 	var player = this;
 	Users.getFromToken(content.token, function(user, connected) {
@@ -323,17 +344,19 @@ Player.prototype.fromToken = function(content) {
 };
 
 Player.prototype.start = function(content) {
-	var askedWorld = ((content.askedWorld) ? content.world.toLowerCase() : null);
+	var askedWorld = ((content.askedWorld) ? content.askedWorld.toLowerCase() : null);
 	var token = content.token;
 	var player = this;
 	if (!this.user) {
-		Users.createGuest(token, this.getNickname(), function(user, token) {
-			player.user = user;
-			player.client.emit('token', {
-				token: token
+		if (this.getNickname()) {
+			Users.createGuest(token, this.getNickname(), function(user, token) {
+				player.user = user;
+				player.client.emit('token', {
+					token: token
+				});
+				player.init(askedWorld);
 			});
-			player.init(askedWorld);
-		});
+		}
 	}
 	else this.init(askedWorld);
 };
@@ -341,7 +364,7 @@ Player.prototype.start = function(content) {
 Player.prototype.mouseDown = function(content) {
 	if (this.world) {
 		var mousePosition = content;
-		var entityHash = Loader.loadEntitySync(/*"onclick"*/"car_test");
+		var entityHash = Loader.loadEntityFileSync(/*"onclick"*/"car_test");
 		entityHash.x = mousePosition.x;
 		entityHash.y = mousePosition.y;
 		//this.addEntity(world, entityHash);
@@ -359,7 +382,7 @@ Player.prototype.keyDown = function(content) {
 		this.player(entity);
 		if (this.keys[key]) {
 			this.world.playerActionStart(this.keys[key], this);
-			this.broadcastToWorld('entity', this.entity.export());
+			this.broadcastEntity(this.entity);
 		}
 		else this.world.keyDown(key, this);
 
@@ -382,7 +405,7 @@ Player.prototype.keyUp = function(content) {
 		this.player(entity);
 		if (this.keys[key]) {
 			this.world.playerActionStop(this.keys[key], this);
-			this.broadcastToWorld('entity', this.entity.export());
+			this.broadcastEntity(this.entity);
 		}
 		else this.world.keyUp(key, this);
 	}
@@ -414,7 +437,7 @@ Player.prototype.requests = function(content) {
 			});
 		}
 		else {
-			this.client.emit("error", "The player entity does not exist yet.");
+			this.client.emit("serverError", "The player entity does not exist yet.");
 		}
 	}
 };
@@ -430,7 +453,9 @@ Player.prototype.player = function(content) {
 				worldId = parse.worldId;
 			}
 			else player = content;
-			if (worldId == undefined || worldId == this.world.id) this.entity.update({state: player.state});
+			if (worldId == undefined || worldId == this.world.id) {
+				this.entity.update({state: player.state});
+			}
 		}
 		catch(e) {
 			console.log(e);
@@ -477,7 +502,7 @@ Player.prototype.chatboxMessage = function(content) {
 						"pelotte_pink",
 						"pelotte_red"
 					];
-					var entityHash = Loader.loadEntitySync(pelottes[Math.floor(Math.random()*pelottes.length)]);
+					var entityHash = Loader.loadEntityFileSync(pelottes[Math.floor(Math.random()*pelottes.length)]);
 					entityHash.x = this.world.spawn.x + Math.random() - 0.5;
 					entityHash.y = this.world.spawn.y + Math.random() - 0.5;
 					if (!entityHash.options) entityHash.options = {};
@@ -529,13 +554,12 @@ Player.prototype.initIntervals = function(client) {
 
 	this.intVars = {
 		"entitiesDistance": {
-			"short": {
-			},
-			"medium": {
-			},
-			"semifar": {
-			}
+			"short": { },
+			"medium": { },
+			"semifar": { }
 		},
+
+		"displayedEntitiesId": [],
 
 		"thresholds": {
 			"short": 1000,
@@ -545,16 +569,18 @@ Player.prototype.initIntervals = function(client) {
 
 		"recalc": {
 			"short": 24,
-			"medium": 8,
-			"semifar": 8,
+			"medium": 6,
+			"semifar": 10,
 			"far": 40
 		},
 
 		"update": {
 			"short": 5,
-			"medium": 5,
+			"medium": 2, // times the previous
 			"semifar": 0,
-			"far": 0 // 0 for never
+			"far": 0, // 0 for never
+			"sleep": 300, // Update sleeping entities
+			"hide": 10 // Hide far entities for view
 		},
 
 		"count": 0
@@ -567,12 +593,25 @@ Player.prototype.initIntervals = function(client) {
 		player.recalcDistanceInterval();
 	}, UPDATE_INTERVAL);
 
+	this.eventsIds["world"]["addEntity"].push(
+		this.world.addEventListener('addEntity', function(entities) {
+			var exportedEntities = {};
+			for (var idE in entities) {
+				player.placeEntityInDistanceGroup(entities[idE]);
+				exportedEntities[idE] = entities[idE].export();
+			}
+			player.client.emit('world', {
+				"id": player.world.id,
+				"entities": exportedEntities
+			});
+		})
+	);
+
 };
 
 Player.prototype.recalcDistanceInterval = function() { // will recalc short and medium more often than far
 
 	if (this.world && this.entity) {
-		var dist;
 
 		var entities = {};
 
@@ -602,22 +641,16 @@ Player.prototype.recalcDistanceInterval = function() { // will recalc short and 
 		}
 
 		for (var idE in entities) {
-			dist = this.distFromEntity(entities[idE]);
-			if (dist < this.intVars.thresholds.short) {
-				this.intVars.entitiesDistance.short[idE] = entities[idE];
-			}
-			else if (dist < this.intVars.thresholds.medium) {
-				this.intVars.entitiesDistance.medium[idE] = entities[idE];
-			}
-			else if (dist < this.intVars.thresholds.semifar) {
-				this.intVars.entitiesDistance.semifar[idE] = entities[idE];
-			}
+			this.placeEntityInDistanceGroup(entities[idE]);
 		}
 
-		if (this.intVars.count % this.intVars.update.far == 0) this.worldUpdateInterval("far");
-		else if (this.intVars.count % this.intVars.update.semifar == 0) this.worldUpdateInterval("semifar");
-		else if (this.intVars.count % this.intVars.update.medium == 0) this.worldUpdateInterval("medium");
-		else if (this.intVars.count % this.intVars.update.short == 0) this.worldUpdateInterval("short");
+
+		if (this.intVars.count % (this.intVars.update.short * this.intVars.update.medium * this.intVars.update.semifar * this.intVars.update.far) == 0) this.worldUpdateInterval("far", this.intVars.count % this.intVars.update.sleep == 0);
+		else if (this.intVars.count % (this.intVars.update.short * this.intVars.update.medium * this.intVars.update.semifar) == 0) this.worldUpdateInterval("semifar", this.intVars.count % this.intVars.update.sleep == 0);
+		else if (this.intVars.count % (this.intVars.update.short * this.intVars.update.medium) == 0) this.worldUpdateInterval("medium", this.intVars.count % this.intVars.update.sleep == 0);
+		else if (this.intVars.count % (this.intVars.update.short) == 0) this.worldUpdateInterval("short", this.intVars.count % this.intVars.update.sleep == 0);
+
+		if (this.intVars.count % this.intVars.update.hide == 0) this.hideDistantEntities();
 
 		this.intVars.count++;
 	}
@@ -625,10 +658,17 @@ Player.prototype.recalcDistanceInterval = function() { // will recalc short and 
 Player.prototype.distFromEntity = function(entity) { // possible optimization : if aabb < ? use only x & y
 	var playerEntity = this.entity;
 
-	if (entity == playerEntity) return 0;
+	if (!playerEntity || entity == playerEntity) return 0;
 
 	var pPos = playerEntity.getPos();
 	var ePos = entity.getPos();
+
+	// Add velocity
+	var pVel = playerEntity.getVel();
+	var pPosVel = {
+		x: pPos.x + pVel.x * 1000,
+		y: pPos.y + pVel.y * 1000
+	};
 
 	var dx = ePos.x - pPos.x;
 	var dy = ePos.y - pPos.y;
@@ -640,14 +680,35 @@ Player.prototype.distFromEntity = function(entity) { // possible optimization : 
 		var aabbPlayer = playerEntity.physicsBody.aabb();
 		var aabbEntity = entity.physicsBody.aabb();
 
-		var aabbdx = (aabbEntity.x - aabbEntity.hw * Math.sign(dx)) - (aabbPlayer.x + aabbPlayer.hw * Math.sign(dx));
+		var playerRadius = Math.sqrt(aabbPlayer.hw * aabbPlayer.hw + aabbPlayer.hh * aabbPlayer.hh);
+		var entityRadius = Math.sqrt(aabbEntity.hw * aabbEntity.hw + aabbEntity.hh * aabbEntity.hh);
+
+		var dist = distToSegment(ePos, pPos, pPosVel);
+
+		return Math.max(0, dist - playerRadius - entityRadius);
+
+
+
+		/* var aabbdx = (aabbEntity.x - aabbEntity.hw * Math.sign(dx)) - (aabbPlayer.x + aabbPlayer.hw * Math.sign(dx));
 		var aabbdy = (aabbEntity.y - aabbEntity.hh * Math.sign(dy)) - (aabbPlayer.y + aabbPlayer.hh * Math.sign(dy));
 
 		if (aabbdx * Math.sign(dx) < 0 && aabbdy * Math.sign(dy) < 0) return 0;
 		else if (aabbdx * Math.sign(dx) < 0) return Math.abs(aabbdy);
 		else if (aabbdy * Math.sign(dy) < 0) return Math.abs(aabbdx);
 
-		return Math.sqrt(aabbdx * aabbdx + aabbdy * aabbdy);
+		return Math.sqrt(aabbdx * aabbdx + aabbdy * aabbdy);*/
+	}
+};
+Player.prototype.placeEntityInDistanceGroup = function(entity) {
+	var dist = this.distFromEntity(entity);
+	if (dist < this.intVars.thresholds.short) {
+		this.intVars.entitiesDistance.short[entity.id] = entity;
+	}
+	else if (dist < this.intVars.thresholds.medium) {
+		this.intVars.entitiesDistance.medium[entity.id] = entity;
+	}
+	else if (dist < this.intVars.thresholds.semifar * (this.world.gamemode.params.player.speedLimit * this.world.gamemode.params.player.speedLimit)) {
+		this.intVars.entitiesDistance.semifar[entity.id] = entity;
 	}
 };
 
@@ -657,43 +718,90 @@ Player.prototype.clearEntityDistance = function(entityId) {
 	if (this.intVars.entitiesDistance.semifar[entityId]) delete this.intVars.entitiesDistance.semifar[entityId];
 };
 
-Player.prototype.worldUpdateInterval = function(range) {
+Player.prototype.worldUpdateInterval = function(range, sendSleepingEntities) {
 
 	if (this.world) {
 
 		var entities = {};
+		var sleep = null;
+
+		var shouldSendEntity = (entity) => {
+			var isSleeping = entity.sleep();
+			if (typeof isSleeping === 'undefined') isSleeping = true;
+			return !isSleeping || sendSleepingEntities || this.intVars.displayedEntitiesId.indexOf(entity.id) == -1;
+		};
 
 		if (range == "far") {
-			entities = this.world.export().entities;
+			for (var id in this.world) {
+				entities[id] = this.wolrd.entities[id].export();
+			}
 		}
 
 		if (range == "semifar") {
 			for (var id in this.intVars.entitiesDistance.semifar) {
-				entities[id] = this.intVars.entitiesDistance.semifar[id].export();
+				if (shouldSendEntity(this.intVars.entitiesDistance.semifar[id])) {
+					entities[id] = this.intVars.entitiesDistance.semifar[id].export();
+				}
 			}
 		}
 
 		if (range == "medium" || range == "semifar") {
 			for (var id in this.intVars.entitiesDistance.medium) {
-				entities[id] = this.intVars.entitiesDistance.medium[id].export();
+				if (shouldSendEntity(this.intVars.entitiesDistance.medium[id])) {
+					entities[id] = this.intVars.entitiesDistance.medium[id].export();
+				}
 			}
 		}
 
 		if (range == "short" || range == "medium" || range == "semifar") {
 			for (var id in this.intVars.entitiesDistance.short) {
-				entities[id] = this.intVars.entitiesDistance.short[id].export();
+				if (shouldSendEntity(this.intVars.entitiesDistance.short[id])) {
+					entities[id] = this.intVars.entitiesDistance.short[id].export();
+				}
 			}
 		}
 
 		delete entities[this.entity.id];
 
-		this.client.emit('world', {
-			"id": this.world.id,
-			"entities": entities
-		});
+		var count = 0;
+		var index;
+		for (var id in entities) {
+			index = this.intVars.displayedEntitiesId.indexOf(entities[id].id);
+			if (index == -1) this.intVars.displayedEntitiesId.push(entities[id].id);
+			count++;
+		}
+
+		if (count > 0) {
+			this.client.emit('world', {
+				"id": this.world.id,
+				"entities": entities
+			});
+		}
 
 	}
 
+};
+
+Player.prototype.hideDistantEntities = function() {
+	if (this.world) {
+		var entitiesId = [];
+		for (var idE in this.intVars.entitiesDistance.semifar) {
+			entitiesId.push(this.intVars.entitiesDistance.semifar[idE].id);
+		}
+		for (var idE in this.intVars.entitiesDistance.far) {
+			entitiesId.push(this.intVars.entitiesDistance.far[idE].id);
+		}
+		var index;
+		var sendHide = [];
+		for (var i in entitiesId) {
+			index = this.intVars.displayedEntitiesId.indexOf(entitiesId[i]);
+			if (index != -1) {
+				this.intVars.displayedEntitiesId.splice(index, 1);
+				sendHide.push(entitiesId[i]);
+			}
+		}
+		if (sendHide.length > 0) this.client.emit('hideEntities', { entities: sendHide });
+	}
 };
 
 
@@ -768,3 +876,16 @@ function inArray(needle, haystack) {
     }
     return false;
 }
+
+
+function sqr(x) { return x * x }
+function dist2(v, w) { return sqr(v.x - w.x) + sqr(v.y - w.y) }
+function distToSegmentSquared(p, v, w) {
+  var l2 = dist2(v, w);
+  if (l2 == 0) return dist2(p, v);
+  var t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return dist2(p, { x: v.x + t * (w.x - v.x),
+                    y: v.y + t * (w.y - v.y) });
+}
+function distToSegment(p, v, w) { return Math.sqrt(distToSegmentSquared(p, v, w)); }

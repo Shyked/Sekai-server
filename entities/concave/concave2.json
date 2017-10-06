@@ -1,0 +1,11 @@
+{
+  "type": "Concave",
+  "texture": "concave",
+  "options": {
+    "restitution": 0.5
+  },
+  "hiddenChildren": false,
+  "vertices": [
+    {"x": -, "y": 100},
+  ]
+}
