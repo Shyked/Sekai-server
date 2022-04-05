@@ -15,7 +15,17 @@ Clients.prototype.attachServer = function(server) {
 
 	var io = require('socket.io')(server, {
 		pingInterval: 5000,
-		pingTimeout: 10000
+		pingTimeout: 10000,
+		cors: {
+			origin: [
+				"https://sekai.shyked.fr",
+				"http://sekai.shyked.fr",
+				"https://shyked.fr/sekai",
+				"http://shyked.fr/sekai",
+				"http://localhost"
+			],
+			methods: ['GET', 'POST', 'PUT']
+		}
 	});
 	var Clients = this;
 	io.on('connection', function(socket){

@@ -646,10 +646,10 @@ Physics.util = {};
 // inside: src/math/transform.js
 
 (function(){
-    
+
     /**
      * class Physics.transform
-     * 
+     *
      * Vector Transformations class for rotating and translating vectors
      **/
 
@@ -660,7 +660,7 @@ Physics.util = {};
      * - transform (Physics.transform): Transform to copy
      * - angle (Number): Angle (radians) to use for rotation
      * - origin (Vectorish): Origin of the rotation
-     * 
+     *
      * Transform Constructor / Factory
      **/
     var Transform = function Transform( vect, angle, origin ) {
@@ -671,7 +671,7 @@ Physics.util = {};
 
         this.v = new Physics.vector();
         this.o = new Physics.vector(); // origin of rotation
-        
+
         if ( vect instanceof Transform ){
 
             this.clone( vect );
@@ -688,7 +688,7 @@ Physics.util = {};
     /**
      * Physics.transform#setTranslation( vect ) -> this
      * - vect (Vectorish): The translation vector
-     * 
+     *
      * Set the translation portion of the transform.
      **/
     Transform.prototype.setTranslation = function( vect ){
@@ -723,7 +723,7 @@ Physics.util = {};
      * - transform (Physics.transform): Transform to copy
      * + (this): For chaining
      * + (Physics.transform): New copy of `this` if none is specified as an argument
-     * 
+     *
      * Clone another transform. Or clone self into new transform.
      **/
     Transform.prototype.clone = function( t ){
@@ -1552,9 +1552,9 @@ Physics.util = {};
 
     /**
      * Physics.noConflict() -> Physics
-     * 
+     *
      * Restore the original reference to the global window.Physics variable.
-     * 
+     *
      * Does nothing if PhysicsJS doesn't have a reference in global scope
      **/
     Physics.noConflict = function(){
@@ -1562,7 +1562,7 @@ Physics.util = {};
         if ( window.Physics === Physics ) {
             window.Physics = _Physics;
         }
-        
+
         return Physics;
     };
 
@@ -2978,7 +2978,7 @@ Physics.scratchpad = (function(){
     function now(){
         // http://updates.html5rocks.com/2012/05/requestAnimationFrame-API-now-with-sub-millisecond-precision
         return (perf && perf.now) ?
-            (perf.now() + perf.timing.navigationStart) :
+            (perf.now() + (perf.timeOrigin || perf.timing.navigationStart)) :
             Date.now();
     }
 
@@ -3095,7 +3095,7 @@ Physics.scratchpad = (function(){
      * Group helpers
      */
     var fnTrue = function(){ return !0; }; // return true
-    
+
     var indexOf = Physics.util.indexOf;
 
     /** hide
@@ -3103,7 +3103,7 @@ Physics.scratchpad = (function(){
      * - fn (Function): The test function
      * - prop (String): The property name to test
      * - propVal (Mixed): The property value
-     * 
+     *
      * Get test function to test on sub property.
      **/
     var wrapRule = function wrapRule( fn, prop ){
@@ -3116,18 +3116,18 @@ Physics.scratchpad = (function(){
      * $eq( toMatch[, prop] ) -> Function
      * - toMatch (Mixed): The value to match
      * - prop (String): The property name to test
-     * 
+     *
      * Get an equality test function.
      **/
     var $eq = function $eq( toMatch, prop ){
         return function( thing ){
-            
+
             thing = prop ? thing[ prop ] : thing;
 
             var fr = 0
                 ,bk
                 ;
-            
+
             if ( Physics.util.isArray( thing ) ){
 
                 if ( Physics.util.isArray( toMatch ) ){
@@ -3167,7 +3167,7 @@ Physics.scratchpad = (function(){
      * $ne( toMatch[, prop] ) -> Function
      * - toMatch (Mixed): The value to match
      * - prop (String): The property name to test
-     * 
+     *
      * Get a NOT equality test function.
      **/
     var $ne = function $ne( toMatch, prop ){
@@ -3181,14 +3181,14 @@ Physics.scratchpad = (function(){
      * $in( toMatch[, prop] ) -> Function
      * - toMatch (Array): The array to match
      * - prop (String): The property name to test
-     * 
+     *
      * Get a test function for matching ANY in array
      **/
     var $in = function $in( toMatch, prop ){
         return function( thing ){
 
             thing = prop ? thing[ prop ] : thing;
-            
+
             var fr = 0
                 ,bk
                 ;
@@ -3220,7 +3220,7 @@ Physics.scratchpad = (function(){
      * $nin( toMatch[, prop] ) -> Function
      * - toMatch (Array): The array to match
      * - prop (String): The property name to test
-     * 
+     *
      * Get a test function for matching NOT ANY in array
      **/
     var $nin = function $nin( toMatch, prop ){
@@ -3233,7 +3233,7 @@ Physics.scratchpad = (function(){
     /** hide
      * $at( point ) -> Function
      * - point (Vectorish): The point to check
-     * 
+     *
      * Get a test function to match any body who's aabb intersects point
      **/
     var $at = function $at( point ){
@@ -3247,7 +3247,7 @@ Physics.scratchpad = (function(){
     /** hide
      * $and( first ) -> Function
      * - first (Function): First function node. `first.next` should have the next function, and so on.
-     * 
+     *
      * Get an AND test function.
      **/
     var $and = function $and( first ){
@@ -3267,7 +3267,7 @@ Physics.scratchpad = (function(){
     /** hide
      * $or( first ) -> Function
      * - first (Function): First function node. `first.next` should have the next function, and so on.
-     * 
+     *
      * Get an OR test function.
      **/
     var $or = function $or( first ){
@@ -3298,7 +3298,7 @@ Physics.scratchpad = (function(){
      * Physics.query( rules ) -> Function
      * - rules (Object): The mongodb-like search rules. (See description).
      * + (Function): The test function
-     * 
+     *
      * Creates a function that can be used to perform tests on objects.
      *
      * The test function will return a [[Boolean]]; `true` if the object matches the tests.
@@ -3324,12 +3324,12 @@ Physics.scratchpad = (function(){
      * - $in: Test if some value (or array of values) is one of the specified array of values
      * - $nin: Test if some value (or array of values) is _NOT_ one of the specified array of values
      * - $at: Test if a body's [[Physics.aabb]] includes specified point. It's a primative hit-test.
-     * 
+     *
      * Example:
      *
      * ```javascript
      * var wheelsArray = [];
-     * 
+     *
      * var queryFn = Physics.query({
      *     name: 'circle', // only circles
      *     $nin: wheelsArray, // not in the wheelsArray
@@ -3361,13 +3361,13 @@ Physics.scratchpad = (function(){
             ;
 
         if ( $op ){
-            
+
             // parse operation choice
             if ( $op === '$or' || $op === '$and' ){
 
                 // expect a rules array
                 for ( op = 0, l = rules.length; op < l; ++op ){
-                    
+
                     fn = Query( rules[ op ] );
                     // if first hasn't been set yet, set it and start the list there
                     // otherwise set the next node of the list
@@ -3388,11 +3388,11 @@ Physics.scratchpad = (function(){
         // loop through rules
         for ( op in rules ){
             rule = rules[ op ];
-   
+
             if ( op[0] === '$' ){
                 // it's an operation rule
                 fn = Query( rule, op );
-                
+
             } else if ( Physics.util.isPlainObject( rule ) ) {
                 // it's an object so parse subrules
                 fn = wrapRule( Query( rule ), op );
@@ -3429,7 +3429,7 @@ Physics.scratchpad = (function(){
      * - name (String): The name of the behavior to create
      * - options (Object): The configuration for that behavior ( depends on behavior ).
        Available options and defaults:
-       
+
        ```javascript
         {
            priority: 0 // the priority of this body
@@ -3452,26 +3452,26 @@ Physics.scratchpad = (function(){
         /** internal
          * Behavior#init( options )
          * - options (Object): The configuration options passed by the factory
-         * 
+         *
          * Initialization. Internal use.
          **/
         init: function( options ){
-            
+
             /** related to: Physics.util.options
              * Behavior#options( options ) -> Object
              * - options (Object): The options to set as an object
              * + (Object): The options
-             * 
-             * Set options on this instance. 
-             * 
+             *
+             * Set options on this instance.
+             *
              * Access options directly from the options object.
-             * 
+             *
              * Example:
              *
              * ```javascript
              * this.options.someOption;
              * ```
-             * 
+             *
              **/
             this.options = Physics.util.options( defaults );
             this.options( options );
@@ -3480,7 +3480,7 @@ Physics.scratchpad = (function(){
         /**
          * Behavior#applyTo( arr ) -> this
          * - arr (Array): Array of bodies to apply this behavior to. Specify `true` for all objects in world.
-         * 
+         *
          * Apply the behavior to a group of bodies.
          **/
         applyTo: function( arr ){
@@ -3496,11 +3496,11 @@ Physics.scratchpad = (function(){
         /**
          * Behavior#getTargets() -> Array
          * + (Array): The array of bodies (by reference!) this behavior is applied to.
-         * 
+         *
          * Get the array of bodies (by reference!) this behavior is applied to.
          **/
         getTargets: function(){
-            
+
             return this._targets || ( this._world ? this._world._bodies : [] );
         },
 
@@ -3530,7 +3530,7 @@ Physics.scratchpad = (function(){
         /**
          * Behavior#connect( world )
          * - world (Physics.world): The world to connect to
-         * 
+         *
          * Connect to a world.
          *
          * Extend this when creating behaviors if you need to specify pubsub management.
@@ -3546,7 +3546,7 @@ Physics.scratchpad = (function(){
         /**
          * Behavior#disconnect( world )
          * - world (Physics.world): The world to disconnect from
-         * 
+         *
          * Disconnect from a world.
          *
          * Extend this when creating behaviors if you need to specify pubsub management.
@@ -3562,7 +3562,7 @@ Physics.scratchpad = (function(){
         /**
          * Behavior#behave( data )
          * - data (Object): The pubsub `integrate:positions` event data
-         * 
+         *
          * Default method run on every world integration.
          *
          * You _must_ extend this when creating a behavior,
@@ -4153,7 +4153,7 @@ Physics.scratchpad = (function(){
         /** internal
          * Geometry#init( options )
          * - options (Object): The configuration options passed by the factory
-         * 
+         *
          * Initialization. Internal use.
          **/
         init: function( options ){
@@ -4162,29 +4162,29 @@ Physics.scratchpad = (function(){
              * Geometry#options( options ) -> Object
              * - options (Object): The options to set as an object
              * + (Object): The options
-             * 
-             * Set options on this instance. 
-             * 
+             *
+             * Set options on this instance.
+             *
              * Access options directly from the options object.
-             * 
+             *
              * Example:
              *
              * ```javascript
              * this.options.someOption;
              * ```
-             * 
+             *
              **/
             this.options = Physics.util.options();
             this.options( options );
 
             this._aabb = new Physics.aabb();
         },
-        
+
         /** related to: Physics.aabb
          * Geometry#aabb( angle ) -> Object
          * - angle (Number): The angle to rotate the geometry
          * + (Object): Bounding box values
-         * 
+         *
          * Get axis-aligned bounding box for this object (rotated by angle if specified).
          **/
         aabb: function( angle ){
@@ -4197,14 +4197,14 @@ Physics.scratchpad = (function(){
          * - dir (Physics.vector): Direction to look
          * - result (Physics.vector): A vector to write result to. Speeds up calculations.
          * + (Physics.vector): The farthest hull point in local coordinates
-         * 
+         *
          * Get farthest point on the hull of this geometry
          * along the direction vector `dir`
          * returns local coordinates. Replaces result if provided.
          *
-         * Assume all coordinates are relative to the geometry 
+         * Assume all coordinates are relative to the geometry
          * centroid (IE: in the body frame).
-         * 
+         *
          * This should take a direction vector then it should
          * calculate the location (in that frame of reference)
          * of the point on the perimeter (hull) if you traveled
@@ -4225,7 +4225,7 @@ Physics.scratchpad = (function(){
          * - dir (Physics.vector): Direction to look
          * - result (Physics.vector): A vector to write result to. Speeds up calculations.
          * + (Physics.vector): The farthest hull point in local coordinates
-         * 
+         *
          * Get farthest point on the core shape of this geometry
          * along the direction vector `dir`
          * returns local coordinates. Replaces result if provided.
@@ -6048,7 +6048,7 @@ Physics.body('point', function( parent ){
 // ---
 // inside: src/geometries/circle.js
 
-/** 
+/**
  * class CircleGeometry < Geometry
  *
  * Physics.geometry('circle')
@@ -6093,7 +6093,7 @@ Physics.geometry('circle', function( parent ){
             this._aabb = Physics.aabb();
             this.radius = this.options.radius;
         },
-                
+
         // extended
         aabb: function( angle ){
 
@@ -6652,7 +6652,7 @@ Physics.geometry('rectangle', function( parent ){
 /*
  * @requires geometries/circle
  */
-/** 
+/**
  * class CircleBody < Body
  *
  * Physics.body('circle')
@@ -7038,7 +7038,7 @@ Physics.body('rectangle', function( parent ){
 // ---
 // inside: src/behaviors/attractor.js
 
-/** 
+/**
  * class AttractorBehavior < Behavior
  *
  * `Physics.behavior('attractor')`.
@@ -7094,7 +7094,7 @@ Physics.behavior('attractor', function( parent ){
          * Get or set the position of the attractor.
          **/
         position: function( pos ){
-            
+
             var self = this;
 
             if ( pos ){
@@ -7104,7 +7104,7 @@ Physics.behavior('attractor', function( parent ){
 
             return this._pos.values();
         },
-        
+
         // extended
         behave: function( data ){
 
@@ -7121,7 +7121,7 @@ Physics.behavior('attractor', function( parent ){
                 ;
 
             for ( var j = 0, l = bodies.length; j < l; j++ ){
-                
+
                 body = bodies[ j ];
 
                 // clone the position
@@ -7976,7 +7976,7 @@ Physics.behavior('body-impulse-response', function( parent ){
 // ---
 // inside: src/behaviors/constant-acceleration.js
 
-/** 
+/**
  * class ConstantAccelerationBehavior < Behavior
  *
  * `Physics.behavior('constant-acceleration')`.
@@ -8013,7 +8013,7 @@ Physics.behavior('constant-acceleration', function( parent ){
         /**
          * ConstantAccelerationBehavior#setAcceleration( acc ) -> this
          * - acc (Vectorish): The acceleration vector
-         * 
+         *
          * Set the acceleration of the behavior.
          **/
         setAcceleration: function( acc ){
@@ -8028,7 +8028,7 @@ Physics.behavior('constant-acceleration', function( parent ){
             var bodies = this.getTargets();
 
             for ( var i = 0, l = bodies.length; i < l; ++i ){
-                
+
                 bodies[ i ].accelerate( this._acc );
             }
         }
