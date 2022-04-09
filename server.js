@@ -7,6 +7,7 @@ var Entity = require("./src/entity").Entity;
 
 
 var server = require('http').createServer();
+var initialized = false;
 
 Clients.attachServer(server);
 
@@ -19,6 +20,9 @@ Synchronizer.setStartingWorldId("planets");
 
 
 Synchronizer.ready(function() {
+    if (initialized) return;
+    initialized = true;
+
     server.listen((process.env.PORT) ? process.env.PORT : 4433);
     console.log("Server started");
 
@@ -27,7 +31,7 @@ Synchronizer.ready(function() {
 
     /* From Ogar : CLI */
 
-    var readline = require('readline');	
+    var readline = require('readline');
     var in_ = readline.createInterface({ input: process.stdin, output: process.stdout });
     setTimeout(prompt, 100);
 
@@ -38,7 +42,7 @@ Synchronizer.ready(function() {
         in_.question("> ", function(str) {
         	parseCommands(str);
             return prompt(); // Too lazy to learn async
-        });	
+        });
     };
 
     function parseCommands(str) {

@@ -33,8 +33,10 @@
 		};
 
 		Users.ready(function() {
-			sync.readyStates['users'] = true;
-			if (sync.isReady()) sync.triggerEvent('ready');
+			if (!sync.readyStates['users']) {
+				sync.readyStates['users'] = true;
+				if (sync.isReady()) sync.triggerEvent('ready');
+			}
 		});
 
 	};
